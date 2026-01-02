@@ -1,0 +1,74 @@
+@using VendorX.ViewModels
+@using VendorX.Models.Enums
+@model BakiViewModel
+
+@{
+    ViewData["Title"] = "Create Baki Record";
+    var customers = ViewBag.Customers as List<CustomerViewModel>;
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark">
+                    <h3 class="mb-0"><i class="bi bi-wallet2"></i> Create Baki Record</h3>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Create" method="post">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="CustomerId" class="form-label"></label>
+                            <select asp-for="CustomerId" class="form-select">
+                                <option value="">-- Select Customer --</option>
+                                @if (customers != null)
+                                {
+                                    foreach (var customer in customers)
+                                    {
+                                        <option value="@customer.CustomerId">@customer.FullName - @customer.PhoneNumber</option>
+                                    }
+                                }
+                            </select>
+                            <span asp-validation-for="CustomerId" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Amount" class="form-label"></label>
+                            <input asp-for="Amount" class="form-control" placeholder="0.00" />
+                            <span asp-validation-for="Amount" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="TransactionType" class="form-label"></label>
+                            <select asp-for="TransactionType" class="form-select">
+                                <option value="@((int)TransactionType.Purchase)">Purchase (Money Owed)</option>
+                                <option value="@((int)TransactionType.Payment)">Payment (Money Received)</option>
+                            </select>
+                            <span asp-validation-for="TransactionType" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label"></label>
+                            <textarea asp-for="Description" class="form-control" rows="3" placeholder="Enter description"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-warning btn-lg text-dark">
+                                <i class="bi bi-check-circle"></i> Create Baki Record
+                            </button>
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="bi bi-x-circle"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

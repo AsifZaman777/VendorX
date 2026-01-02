@@ -1,0 +1,145 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome to VendorX</h1>
+    <p class="lead">Complete Vendor/Shop Management System</p>
+</div>
+
+<div class="row mt-5">
+    <div class="col-md-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-user-shield fa-3x text-primary mb-3"></i>
+                <h5 class="card-title">SuperAdmin</h5>
+                <p class="card-text">Manage all shops and customers across the platform. Full system administration and oversight.</p>
+                @if (!User.Identity?.IsAuthenticated == true)
+                {
+                    <a asp-controller="Account" asp-action="Login" class="btn btn-primary">Login</a>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-store fa-3x text-success mb-3"></i>
+                <h5 class="card-title">ShopKeeper</h5>
+                <p class="card-text">Manage your shop, process sales, handle orders, track inventory, and manage customer credit (Baki).</p>
+                @if (!User.Identity?.IsAuthenticated == true)
+                {
+                    <a asp-controller="Account" asp-action="Register" class="btn btn-success">Register</a>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-user fa-3x text-info mb-3"></i>
+                <h5 class="card-title">Customer</h5>
+                <p class="card-text">Register to shops, make purchases, track orders, and manage your Baki (credit) across multiple shops.</p>
+                @if (!User.Identity?.IsAuthenticated == true)
+                {
+                    <a asp-controller="Account" asp-action="Register" class="btn btn-info">Register</a>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-12">
+        <h2 class="text-center mb-4">Key Features</h2>
+    </div>
+    <div class="col-md-6 col-lg-3 mb-4">
+        <div class="card border-primary">
+            <div class="card-body text-center">
+                <i class="fas fa-cash-register fa-2x text-primary mb-3"></i>
+                <h6 class="card-title">Point of Sale</h6>
+                <p class="card-text small">Fast and efficient POS system with instant notifications</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3 mb-4">
+        <div class="card border-success">
+            <div class="card-body text-center">
+                <i class="fas fa-money-bill-wave fa-2x text-success mb-3"></i>
+                <h6 class="card-title">Baki Management</h6>
+                <p class="card-text small">Track credit purchases and monthly settlements</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3 mb-4">
+        <div class="card border-info">
+            <div class="card-body text-center">
+                <i class="fas fa-box fa-2x text-info mb-3"></i>
+                <h6 class="card-title">Order Management</h6>
+                <p class="card-text small">Create and track pending orders with delivery status</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3 mb-4">
+        <div class="card border-warning">
+            <div class="card-body text-center">
+                <i class="fas fa-chart-bar fa-2x text-warning mb-3"></i>
+                <h6 class="card-title">Reports & Analytics</h6>
+                <p class="card-text small">Comprehensive reports for sales, expenses, and profit</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3 mb-4">
+        <div class="card border-danger">
+            <div class="card-body text-center">
+                <i class="fas fa-qrcode fa-2x text-danger mb-3"></i>
+                <h6 class="card-title">QR Registration</h6>
+                <p class="card-text small">Easy customer registration via QR codes</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3 mb-4">
+        <div class="card border-secondary">
+            <div class="card-body text-center">
+                <i class="fas fa-bell fa-2x text-secondary mb-3"></i>
+                <h6 class="card-title">Notifications</h6>
+                <p class="card-text small">Email and WhatsApp notifications for all transactions</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3 mb-4">
+        <div class="card border-primary">
+            <div class="card-body text-center">
+                <i class="fas fa-boxes fa-2x text-primary mb-3"></i>
+                <h6 class="card-title">Inventory</h6>
+                <p class="card-text small">Manage products and categories efficiently</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3 mb-4">
+        <div class="card border-success">
+            <div class="card-body text-center">
+                <i class="fas fa-receipt fa-2x text-success mb-3"></i>
+                <h6 class="card-title">Invoicing</h6>
+                <p class="card-text small">Generate and send monthly Baki invoices</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (!User.Identity?.IsAuthenticated == true)
+{
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="alert alert-info text-center" role="alert">
+                <h4 class="alert-heading"><i class="fas fa-info-circle"></i> Getting Started</h4>
+                <p>Choose your role and register to start using VendorX. ShopKeepers can manage their shops and customers, while Customers can register to multiple shops and track their purchases.</p>
+                <hr>
+                <p class="mb-0">
+                    <a asp-controller="Account" asp-action="Register" class="btn btn-primary me-2">Register Now</a>
+                    <a asp-controller="Account" asp-action="Login" class="btn btn-outline-primary">Already have an account? Login</a>
+                </p>
+            </div>
+        </div>
+    </div>
+}

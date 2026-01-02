@@ -1,0 +1,309 @@
+@using VendorX.Models
+@model BakiInvoice
+
+@{
+    ViewData["Title"] = "Invoice Details";
+}
+
+<!-- Print/PDF Specific Styles -->
+<style>
+    @@media print {
+        .no-print {
+            display: none !important;
+        }
+        .invoice-box {
+            box-shadow: none !important;
+            border: 1px solid #ddd;
+        }
+        body {
+            background: white;
+        }
+    }
+
+    .invoice-box {
+        max-width: 800px;
+        margin: auto;
+        padding: 30px;
+        border: 1px solid #eee;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+        font-size: 16px;
+        line-height: 24px;
+        color: #555;
+        background: white;
+    }
+
+    .invoice-box table {
+        width: 100%;
+        line-height: inherit;
+        text-align: left;
+    }
+
+    .invoice-box table td {
+        padding: 5px;
+        vertical-align: top;
+    }
+
+    .invoice-box table tr td:nth-child(3) {
+        text-align: right;
+    }
+
+    .invoice-box table tr.top table td {
+        padding-bottom: 20px;
+    }
+
+    .invoice-box table tr.top table td.title {
+        font-size: 45px;
+        line-height: 45px;
+        color: #333;
+    }
+
+    .invoice-box table tr.information table td {
+        padding-bottom: 40px;
+    }
+
+    .invoice-box table tr.heading td {
+        background: #eee;
+        border-bottom: 1px solid #ddd;
+        font-weight: bold;
+    }
+
+    .invoice-box table tr.details td {
+        padding-bottom: 20px;
+    }
+
+    .invoice-box table tr.item td {
+        border-bottom: 1px solid #eee;
+    }
+
+    .invoice-box table tr.item.last td {
+        border-bottom: none;
+    }
+
+    .invoice-box table tr.total td:nth-child(3) {
+        border-top: 2px solid #eee;
+        font-weight: bold;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: bold;
+    }
+
+    .status-sent {
+        background-color: #28a745;
+        color: white;
+    }
+
+    .status-pending {
+        background-color: #ffc107;
+        color: #000;
+    }
+</style>
+
+<div class="container-fluid mt-4 no-print">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            <i class="bi bi-file-earmark-text"></i> Invoice Details
+        </h1>
+        <div>
+            <button onclick="window.print()" class="btn btn-primary">
+                <i class="bi bi-printer"></i> Print Invoice
+            </button>
+            <button onclick="downloadPDF()" class="btn btn-danger">
+                <i class="bi bi-file-pdf"></i> Download PDF
+            </button>
+            @if (!Model.IsSent)
+            {
+                <form asp-action="SendInvoice" asp-route-id="@Model.BakiInvoiceId" method="post" style="display: inline;">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-success" onclick="return confirm('Send this invoice to customer?')">
+                        <i class="bi bi-send"></i> Send Invoice
+                    </button>
+                </form>
+            }
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Baki
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="invoice-box" id="invoice-content">
+    <table cellpadding="0" cellspacing="0">
+        <tr class="top">
+            <td colspan="3">
+                <table>
+                    <tr>
+                        <td class="title">
+                            <i class="bi bi-shop text-primary"></i><br>
+                            <strong>@(Model.Shop?.ShopName ?? "VendorX")</strong>
+                        </td>
+                        <td>
+                            <strong>Invoice #:</strong> @Model.InvoiceNumber<br>
+                            <strong>Date:</strong> @Model.InvoiceDate.ToString("MMMM dd, yyyy")<br>
+                            <strong>Period:</strong> @Model.Month/@Model.Year<br>
+                            @if (Model.IsSent)
+                            {
+                                <span class="status-badge status-sent">Sent on @Model.SentAt?.ToString("MMM dd, yyyy")</span>
+                            }
+                            else
+                            {
+                                <span class="status-badge status-pending">Pending</span>
+                            }
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+
+        <tr class="information">
+            <td colspan="3">
+                <table>
+                    <tr>
+                        <td>
+                            <strong>From:</strong><br>
+                            @Model.Shop?.ShopName<br>
+                            @Model.Shop?.Address<br>
+                            @Model.Shop?.PhoneNumber
+                        </td>
+                        <td>
+                            <strong>To:</strong><br>
+                            @Model.Customer?.FullName<br>
+                            @Model.Customer?.Email<br>
+                            @Model.Customer?.PhoneNumber
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+
+        <tr class="heading">
+            <td><strong>Date</strong></td>
+            <td><strong>Description</strong></td>
+            <td><strong>Amount</strong></td>
+        </tr>
+
+        @if (Model.BakiInvoiceItems != null && Model.BakiInvoiceItems.Any())
+        {
+            var itemCount = Model.BakiInvoiceItems.Count;
+            var currentItem = 0;
+            
+            foreach (var item in Model.BakiInvoiceItems.OrderBy(i => i.TransactionDate))
+            {
+                currentItem++;
+                var isLast = currentItem == itemCount;
+                
+                <tr class="item @(isLast ? "last" : "")">
+                    <td>@item.TransactionDate.ToString("MMM dd, yyyy")</td>
+                    <td>@(item.Description ?? "Baki Transaction")</td>
+                    <td>$@item.Amount.ToString("F2")</td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr class="item">
+                <td colspan="3" style="text-align: center; color: #999;">No items in this invoice</td>
+            </tr>
+        }
+
+        <tr class="total">
+            <td></td>
+            <td><strong>Subtotal:</strong></td>
+            <td>$@Model.TotalAmount.ToString("F2")</td>
+        </tr>
+
+        <tr class="total">
+            <td></td>
+            <td><strong>Tax (0%):</strong></td>
+            <td>$0.00</td>
+        </tr>
+
+        <tr class="total" style="font-size: 20px; color: #333;">
+            <td></td>
+            <td><strong>Total Due:</strong></td>
+            <td><span style="color: #e74a3b;">$@Model.TotalAmount.ToString("F2")</span></td>
+        </tr>
+    </table>
+
+    @if (!string.IsNullOrEmpty(Model.Notes))
+    {
+        <div style="margin-top: 30px; padding: 15px; background: #f9f9f9; border-left: 4px solid #4e73df;">
+            <strong>Notes:</strong><br>
+            @Model.Notes
+        </div>
+    }
+
+    <div style="margin-top: 50px; padding-top: 20px; border-top: 1px solid #eee; text-align: center; color: #999; font-size: 12px;">
+        <p>Thank you for your business!</p>
+        <p>Please contact us if you have any questions about this invoice.</p>
+        <p style="margin-top: 20px;">
+            <strong>Payment Instructions:</strong><br>
+            Please settle this invoice at your earliest convenience by visiting our shop or contacting us directly.
+        </p>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- jsPDF for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <script>
+        function downloadPDF() {
+            const { jsPDF } = window.jspdf;
+            const invoiceContent = document.getElementById('invoice-content');
+            
+            // Show loading
+            Swal.fire({
+                title: 'Generating PDF...',
+                text: 'Please wait while we create your invoice PDF',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            html2canvas(invoiceContent, {
+                scale: 2,
+                useCORS: true,
+                logging: false
+            }).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                
+                const imgWidth = 210; // A4 width in mm
+                const pageHeight = 297; // A4 height in mm
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                let heightLeft = imgHeight;
+                let position = 0;
+
+                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+
+                while (heightLeft >= 0) {
+                    position = heightLeft - imgHeight;
+                    pdf.addPage();
+                    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+                }
+
+                // Save the PDF
+                pdf.save('Invoice-' + '@Model.InvoiceNumber' + '.pdf');
+                
+                // Close loading
+                Swal.close();
+                
+                // Show success message
+                showSuccess('Invoice PDF downloaded successfully!');
+            }).catch(error => {
+                console.error('Error generating PDF:', error);
+                Swal.close();
+                showError('Failed to generate PDF. Please try printing instead.');
+            });
+        }
+    </script>
+}

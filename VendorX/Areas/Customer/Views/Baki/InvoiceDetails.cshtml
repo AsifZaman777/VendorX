@@ -1,0 +1,103 @@
+@using VendorX.Models
+@model BakiInvoice
+
+@{
+    ViewData["Title"] = "Invoice Details";
+}
+
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h3 class="mb-0"><i class="bi bi-file-earmark-text"></i> Invoice Details</h3>
+            <a asp-action="Alerts" class="btn btn-light btn-sm">
+                <i class="bi bi-arrow-left"></i> Back to Invoices
+            </a>
+        </div>
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h5>Invoice Information</h5>
+                    <dl class="row">
+                        <dt class="col-sm-5">Invoice Number:</dt>
+                        <dd class="col-sm-7"><strong>@Model.InvoiceNumber</strong></dd>
+
+                        <dt class="col-sm-5">Shop:</dt>
+                        <dd class="col-sm-7">@Model.Shop?.ShopName</dd>
+
+                        <dt class="col-sm-5">Period:</dt>
+                        <dd class="col-sm-7">@Model.Month/@Model.Year</dd>
+
+                        <dt class="col-sm-5">Invoice Date:</dt>
+                        <dd class="col-sm-7">@Model.InvoiceDate.ToString("MMMM dd, yyyy")</dd>
+
+                        <dt class="col-sm-5">Status:</dt>
+                        <dd class="col-sm-7">
+                            @if (Model.IsSent)
+                            {
+                                <span class="badge bg-success">Sent on @Model.SentAt?.ToString("MMM dd, yyyy")</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-warning text-dark">Pending</span>
+                            }
+                        </dd>
+                    </dl>
+                </div>
+
+                <div class="col-md-6">
+                    <h5>Payment Summary</h5>
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h2 class="text-danger text-center">
+                                Total Amount Due: $@Model.TotalAmount.ToString("F2")
+                            </h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @if (Model.BakiInvoiceItems != null && Model.BakiInvoiceItems.Any())
+            {
+                <h5 class="mt-4">Invoice Items</h5>
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Date</th>
+                                <th>Description</th>
+                                <th>Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.BakiInvoiceItems)
+                            {
+                                <tr>
+                                    <td>@item.Baki?.CreatedAt.ToString("MMM dd, yyyy")</td>
+                                    <td>@(item.Baki?.Description ?? "N/A")</td>
+                                    <td>${item.Amount:F2}</td>
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot>
+                            <tr class="table-light">
+                                <th colspan="2" class="text-end">Total:</th>
+                                <th>@Model.TotalAmount</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(Model.Notes))
+            {
+                <div class="alert alert-info mt-3">
+                    <strong>Notes:</strong> @Model.Notes
+                </div>
+            }
+
+            <div class="alert alert-warning mt-4">
+                <i class="bi bi-info-circle"></i> <strong>Payment Instructions:</strong> Please contact the shop to arrange payment for this invoice.
+            </div>
+        </div>
+    </div>
+</div>

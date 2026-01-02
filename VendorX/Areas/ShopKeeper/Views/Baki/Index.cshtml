@@ -1,0 +1,226 @@
+@using VendorX.ViewModels
+@using VendorX.Models.Enums
+@model List<BakiViewModel>
+
+@{
+    ViewData["Title"] = "Baki Records";
+    var statusFilter = ViewBag.StatusFilter as BakiStatus?;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0 text-gray-800">
+        <i class="bi bi-wallet2"></i> Baki (Credit) Management
+    </h1>
+    <div>
+        <button type="button" class="btn btn-warning me-2" data-bs-toggle="modal" data-bs-target="#createBakiModal">
+            <i class="bi bi-plus-circle"></i> New Baki
+        </button>
+        <a asp-action="CreateInvoice" class="btn btn-dark">
+            <i class="bi bi-file-earmark-text"></i> Create Invoice
+        </a>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <div class="card border-left-danger shadow">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Total Outstanding</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">$@Model.Where(b => b.Status == BakiStatus.Due).Sum(b => b.Amount).ToString("F2")</div>                        <small class="text-muted">@Model.Count(b => b.Status == BakiStatus.Due) Records Due</small>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-exclamation-triangle fs-2 text-danger"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card border-left-success shadow">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Total Settled</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.Where(b => b.Status == BakiStatus.Settled).Sum(b => b.Amount)</div>
+                        <small class="text-muted">@Model.Count(b => b.Status == BakiStatus.Settled) Records Paid</small>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-check-circle fs-2 text-success"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow">
+    <div class="card-header">
+        <i class="bi bi-list"></i> All Baki Records
+    </div>
+    <div class="card-body">
+        @if (Model == null || !Model.Any())
+        {
+            <div class="alert alert-info text-center">
+                <i class="bi bi-info-circle"></i> No baki records found.
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table id="bakiTable" class="table table-hover table-striped">
+                    <thead>
+                        <tr>
+                            <th>Customer</th>
+                            <th>Amount</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                            <th>Created</th>
+                            <th>Status</th>
+                            <th width="100">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var baki in Model)
+                        {
+                            <tr>
+                                <td><strong>@baki.CustomerName</strong></td>
+                                <td><span class="badge bg-danger fs-6">@(baki.Amount)</span></td>
+                                <td>
+                                    @switch (baki.TransactionType)
+                                    {
+                                        case TransactionType.Purchase:
+                                            <span class="badge bg-info">Purchase</span>
+                                            break;
+                                        case TransactionType.Payment:
+                                            <span class="badge bg-success">Payment</span>
+                                            break;
+                                    }
+                                </td>
+                                <td>@(baki.Description ?? "N/A")</td>
+                                <td>@baki.CreatedAt.ToString("MMM dd, yyyy")</td>
+                                <td>
+                                    @if (baki.Status == BakiStatus.Due)
+                                    {
+                                        <span class="badge bg-danger">Due</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-success">Settled</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (baki.Status == BakiStatus.Due)
+                                    {
+                                        <button type="button" class="btn btn-sm btn-success" onclick="settleBaki(@baki.BakiId)">
+                                            <i class="bi bi-check-circle"></i>
+                                        </button>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Create Baki Modal -->
+<div class="modal fade" id="createBakiModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-wallet2"></i> Create Baki Record</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="Create" method="post">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="CustomerId" class="form-label">Customer *</label>
+                        <select id="CustomerId" name="CustomerId" class="form-select" required>
+                            <option value="">-- Select Customer --</option>
+                            @if (ViewBag.Customers != null)
+                            {
+                                foreach (var customer in (List<CustomerViewModel>)ViewBag.Customers)
+                                {
+                                    <option value="@customer.CustomerId">@customer.FullName - @customer.PhoneNumber</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="Amount" class="form-label">Amount *</label>
+                        <input type="number" class="form-control" id="Amount" name="Amount" step="0.01" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="TransactionType" class="form-label">Transaction Type *</label>
+                        <select id="TransactionType" name="TransactionType" class="form-select" required>
+                            <option value="@((int)TransactionType.Purchase)">Purchase (Money Owed)</option>
+                            <option value="@((int)TransactionType.Payment)">Payment (Money Received)</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="Description" class="form-label">Description</label>
+                        <textarea class="form-control" id="Description" name="Description" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-warning">
+                        <i class="bi bi-save"></i> Create Baki
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('#bakiTable').DataTable({
+                order: [[4, 'desc']],
+                columnDefs: [
+                    { orderable: false, targets: [6] }
+                ]
+            });
+        });
+
+        function settleBaki(id) {
+            Swal.fire({
+                title: 'Settle this Baki?',
+                text: "Mark this baki record as settled (paid)?",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#1cc88a',
+                cancelButtonColor: '#858796',
+                confirmButtonText: 'Yes, settle it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    showLoading();
+                    var form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '@Url.Action("Settle", "Baki")';
+                    
+                    var idInput = document.createElement('input');
+                    idInput.type = 'hidden';
+                    idInput.name = 'id';
+                    idInput.value = id;
+                    form.appendChild(idInput);
+                    
+                    var tokenInput = document.createElement('input');
+                    tokenInput.type = 'hidden';
+                    tokenInput.name = '__RequestVerificationToken';
+                    tokenInput.value = $('input[name="__RequestVerificationToken"]').val();
+                    form.appendChild(tokenInput);
+                    
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            });
+        }
+    </script>
+}

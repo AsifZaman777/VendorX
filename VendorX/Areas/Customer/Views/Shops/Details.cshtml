@@ -1,0 +1,52 @@
+@using VendorX.Models
+@model Shop
+
+@{
+    ViewData["Title"] = "Shop Details";
+}
+
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+            <h3 class="mb-0"><i class="bi bi-shop"></i> @Model.ShopName</h3>
+            <a asp-action="Index" class="btn btn-light btn-sm">
+                <i class="bi bi-arrow-left"></i> Back to My Shops
+            </a>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Shop Information</h5>
+                    <dl class="row">
+                        <dt class="col-sm-4">Name:</dt>
+                        <dd class="col-sm-8">@Model.ShopName</dd>
+
+                        <dt class="col-sm-4">Address:</dt>
+                        <dd class="col-sm-8">@(Model.Address ?? "Not provided")</dd>
+
+                        <dt class="col-sm-4">Phone:</dt>
+                        <dd class="col-sm-8">@(Model.PhoneNumber ?? "Not provided")</dd>
+
+                        <dt class="col-sm-4">Email:</dt>
+                        <dd class="col-sm-8">@(Model.Email ?? "Not provided")</dd>
+                    </dl>
+                </div>
+
+                <div class="col-md-6">
+                    <h5>Quick Actions</h5>
+                    <div class="d-grid gap-2">
+                        <a asp-action="Purchases" asp-route-shopId="@Model.ShopId" class="btn btn-success">
+                            <i class="bi bi-cart-check"></i> View My Purchases
+                        </a>
+                        <a asp-action="Orders" asp-route-shopId="@Model.ShopId" class="btn btn-warning">
+                            <i class="bi bi-bag-check"></i> View My Orders
+                        </a>
+                        <a asp-controller="Baki" asp-action="History" asp-route-shopId="@Model.ShopId" class="btn btn-danger">
+                            <i class="bi bi-wallet2"></i> View My Baki
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

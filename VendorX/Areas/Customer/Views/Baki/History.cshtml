@@ -1,0 +1,108 @@
+@using VendorX.Models
+@using VendorX.Models.Enums
+@model List<Baki>
+
+@{
+    ViewData["Title"] = "My Baki History";
+    var shops = ViewBag.Shops as List<Shop>;
+    var selectedShopId = ViewBag.SelectedShopId as int?;
+}
+
+<div class="container-fluid mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-danger text-white">
+            <h3 class="mb-0"><i class="bi bi-wallet2"></i> My Baki (Credit) History</h3>
+        </div>
+        <div class="card-body">
+            <!-- Filter by Shop -->
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <form method="get">
+                        <div class="input-group">
+                            <select name="shopId" class="form-select">
+                                <option value="">All Shops</option>
+                                @if (shops != null)
+                                {
+                                    foreach (var shop in shops)
+                                    {
+                                        <option value="@shop.ShopId" selected="@(selectedShopId == shop.ShopId)">@shop.ShopName</option>
+                                    }
+                                }
+                            </select>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-funnel"></i> Filter
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            @if (Model == null || !Model.Any())
+            {
+                <div class="alert alert-success text-center">
+                    <i class="bi bi-check-circle"></i> You have no baki records. All clear!
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Shop</th>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Amount</th>
+                                <th>Description</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var baki in Model)
+                            {
+                                <tr>
+                                    <td><strong>@baki.Shop?.ShopName</strong></td>
+                                    <td>@baki.CreatedAt.ToString("MMM dd, yyyy")</td>
+                                    <td>
+                                        @if (baki.TransactionType == TransactionType.Purchase)
+                                        {
+                                            <span class="badge bg-danger">Purchase</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-success">Payment</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-warning text-dark fs-6">$@baki.Amount.ToString("F2")</span>
+                                    </td>
+                                    <td>@(baki.Description ?? "N/A")</td>
+                                    <td>
+                                        @if (baki.Status == BakiStatus.Due)
+                                        {
+                                            <span class="badge bg-danger">Due</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-success">Settled</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot>
+                            <tr class="table-light">
+                                <th colspan="3">Total Outstanding:</th>
+                                <th colspan="3">
+                                    <span class="badge bg-danger fs-5">
+                                        $@Model.Where(b => b.Status == BakiStatus.Due).Sum(b => b.Amount).ToString("F2")
+                                    </span>
+                                </th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>

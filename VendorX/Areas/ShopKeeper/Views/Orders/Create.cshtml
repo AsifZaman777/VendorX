@@ -1,0 +1,245 @@
+@using VendorX.Models
+@model OrderViewModel
+
+@{
+    ViewData["Title"] = "Create Order";
+    var customers = ViewBag.Customers as List<Customer>;
+    var products = ViewBag.Products as List<Product>;
+}
+
+<div class="container-fluid mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-info text-white">
+            <h3 class="mb-0"><i class="bi bi-bag-plus"></i> Create Order</h3>
+        </div>
+        <div class="card-body">
+            <form asp-action="Create" method="post" id="orderForm">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <label class="form-label">Customer</label>
+                        <select id="customerId" name="CustomerId" class="form-select" required>
+                            <option value="">-- Select Customer --</option>
+                            @if (customers != null)
+                            {
+                                foreach (var customer in customers)
+                                {
+                                    <option value="@customer.CustomerId">@customer.FullName - @customer.PhoneNumber</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Delivery Date</label>
+                        <input type="date" name="DeliveryDate" class="form-control" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Notes</label>
+                        <input type="text" name="Notes" class="form-control" placeholder="Optional notes" />
+                    </div>
+                </div>
+
+                <!-- Product Selection -->
+                <div class="card mb-4">
+                    <div class="card-header bg-light">
+                        <h5><i class="bi bi-box-seam"></i> Add Products</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Select Product</label>
+                                <select id="productSelect" class="form-select">
+                                    <option value="">-- Select Product --</option>
+                                    @if (products != null)
+                                    {
+                                        foreach (var product in products)
+                                        {
+                                            <option value="@product.ProductId" data-name="@product.ProductName" data-price="@product.Price" data-stock="@product.StockQuantity">
+                                                @product.ProductName - $@product.Price.ToString("F2") (Stock: @product.StockQuantity)
+                                            </option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Quantity</label>
+                                <input type="number" id="productQuantity" class="form-control" value="1" min="1" />
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">&nbsp;</label>
+                                <button type="button" id="addProductBtn" class="btn btn-primary w-100">
+                                    <i class="bi bi-plus-circle"></i> Add
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Order Items Table -->
+                        <div class="table-responsive">
+                            <table class="table table-bordered" id="orderTable">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Product</th>
+                                        <th style="width: 100px;">Quantity</th>
+                                        <th style="width: 120px;">Unit Price</th>
+                                        <th style="width: 120px;">Total</th>
+                                        <th style="width: 80px;">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="orderBody">
+                                    <tr class="text-center text-muted">
+                                        <td colspan="5">No items added yet</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Total Section -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <h4 class="text-end">Total Amount: <span id="totalDisplay" class="text-primary">$0.00</span></h4>
+                                <input type="hidden" id="totalAmount" name="TotalAmount" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-info btn-lg" id="submitBtn" disabled>
+                        <i class="bi bi-check-circle"></i> Create Order
+                    </button>
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="bi bi-x-circle"></i> Cancel
+                    </a>
+                </div>
+
+                <!-- Hidden Items Container -->
+                <div id="itemsContainer"></div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let orderItems = [];
+
+        $('#addProductBtn').click(function() {
+            const select = $('#productSelect');
+            const productId = select.val();
+            const quantity = parseInt($('#productQuantity').val());
+
+            if (!productId) {
+                alert('Please select a product');
+                return;
+            }
+
+            const selectedOption = select.find(':selected');
+            const productName = selectedOption.data('name');
+            const unitPrice = parseFloat(selectedOption.data('price'));
+            const stock = parseInt(selectedOption.data('stock'));
+
+            if (quantity > stock) {
+                alert('Quantity exceeds available stock');
+                return;
+            }
+
+            const existingItem = orderItems.find(item => item.productId === parseInt(productId));
+            if (existingItem) {
+                existingItem.quantity += quantity;
+                existingItem.totalPrice = existingItem.quantity * existingItem.unitPrice;
+            } else {
+                orderItems.push({
+                    productId: parseInt(productId),
+                    productName: productName,
+                    quantity: quantity,
+                    unitPrice: unitPrice,
+                    totalPrice: quantity * unitPrice
+                });
+            }
+
+            updateOrderTable();
+            select.val('');
+            $('#productQuantity').val(1);
+        });
+
+        function removeItem(index) {
+            orderItems.splice(index, 1);
+            updateOrderTable();
+        }
+
+        function updateQuantity(index, newQuantity) {
+            orderItems[index].quantity = parseInt(newQuantity);
+            orderItems[index].totalPrice = orderItems[index].quantity * orderItems[index].unitPrice;
+            updateOrderTable();
+        }
+
+        function updateOrderTable() {
+            const tbody = $('#orderBody');
+            tbody.empty();
+
+            if (orderItems.length === 0) {
+                tbody.append('<tr class="text-center text-muted"><td colspan="5">No items added yet</td></tr>');
+                $('#submitBtn').prop('disabled', true);
+            } else {
+                orderItems.forEach((item, index) => {
+                    tbody.append(`
+                        <tr>
+                            <td>${item.productName}</td>
+                            <td><input type="number" class="form-control form-control-sm" value="${item.quantity}" min="1" onchange="updateQuantity(${index}, this.value)" /></td>
+                            <td>$${item.unitPrice.toFixed(2)}</td>
+                            <td>$${item.totalPrice.toFixed(2)}</td>
+                            <td><button type="button" class="btn btn-danger btn-sm" onclick="removeItem(${index})"><i class="bi bi-trash"></i></button></td>
+                        </tr>
+                    `);
+                });
+                $('#submitBtn').prop('disabled', false);
+            }
+
+            updateTotal();
+            updateHiddenInputs();
+        }
+
+        function updateTotal() {
+            const total = orderItems.reduce((sum, item) => sum + item.totalPrice, 0);
+            $('#totalDisplay').text('$' + total.toFixed(2));
+            $('#totalAmount').val(total.toFixed(2));
+        }
+
+        function updateHiddenInputs() {
+            const container = $('#itemsContainer');
+            container.empty();
+            
+            orderItems.forEach((item, index) => {
+                container.append(`
+                    <input type="hidden" name="Items[${index}].ProductId" value="${item.productId}" />
+                    <input type="hidden" name="Items[${index}].ProductName" value="${item.productName}" />
+                    <input type="hidden" name="Items[${index}].Quantity" value="${item.quantity}" />
+                    <input type="hidden" name="Items[${index}].UnitPrice" value="${item.unitPrice}" />
+                    <input type="hidden" name="Items[${index}].TotalPrice" value="${item.totalPrice}" />
+                `);
+            });
+        }
+
+        $('#orderForm').submit(function(e) {
+            if (orderItems.length === 0) {
+                e.preventDefault();
+                alert('Please add at least one item to the order');
+                return false;
+            }
+
+            const customerId = $('#customerId').val();
+            if (!customerId) {
+                e.preventDefault();
+                alert('Please select a customer');
+                return false;
+            }
+
+            return true;
+        });
+    </script>
+}

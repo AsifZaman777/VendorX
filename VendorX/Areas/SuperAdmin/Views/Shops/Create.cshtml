@@ -1,0 +1,17 @@
+@* This page is replaced by modal in Index.cshtml - redirect to Index *@
+@{
+    ViewData["Title"] = "Create Shop";
+}
+
+<script>
+    window.location.href = '@Url.Action("Index", "Shops")?openModal=create';
+</script>
+
+<div class="container mt-4">
+    <div class="text-center">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-2">Redirecting...</p>
+    </div>
+</div>

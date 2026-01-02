@@ -1,0 +1,310 @@
+@model DailyReportViewModel
+
+@{
+    ViewData["Title"] = "Daily Report";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0 text-gray-800">
+        <i class="bi bi-calendar-day"></i> Daily Sales Report
+    </h1>
+    <a asp-action="Index" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Back to Reports
+    </a>
+</div>
+
+<!-- Date Selector -->
+<div class="card shadow mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label fw-bold">Select Date</label>
+                <input type="date" name="date" class="form-control" value="@Model.ReportDate.ToString("yyyy-MM-dd")" />
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-search"></i> Generate Report
+                </button>
+            </div>
+            <div class="col-md-7 d-flex align-items-end">
+                <div class="alert alert-info mb-0 w-100">
+                    <strong>Report Date:</strong> @Model.ReportDate.ToString("MMM dd, yyyy")
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Summary Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card border-left-success shadow h-100">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Total Sales</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">$@Model.TotalSales.ToString("F2")</div>
+                        <small class="text-muted">@Model.TotalTransactions Transactions</small>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-currency-dollar fs-2 text-success"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card border-left-danger shadow h-100">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Total Expenses</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">$@Model.TotalExpenses.ToString("F2")</div>
+                        <small class="text-muted">Operating Costs</small>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-cash-stack fs-2 text-danger"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card border-left-info shadow h-100">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Net Profit</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">$@Model.TotalProfit.ToString("F2")</div>
+                        <small class="text-muted">Sales - Expenses</small>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-graph-up-arrow fs-2 text-info"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card border-left-warning shadow h-100">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Total Orders</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.TotalOrders</div>
+                        <small class="text-muted">New Orders</small>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-bag-check fs-2 text-warning"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (Model.TotalBakiAmount > 0)
+{
+    <div class="alert alert-warning shadow-sm mb-4">
+        <h5 class="alert-heading"><i class="bi bi-exclamation-triangle"></i> Baki Alert</h5>
+        <p class="mb-0"><strong>Baki Amount Today:</strong> $@Model.TotalBakiAmount.ToString("F2") in credit transactions</p>
+    </div>
+}
+
+<!-- Charts Row -->
+<div class="row g-3 mb-4">
+    <div class="col-lg-6">
+        <div class="card shadow h-100">
+            <div class="card-header">
+                <i class="bi bi-pie-chart"></i> Transaction Type Distribution
+            </div>
+            <div class="card-body">
+                <div id="transactionTypeChart"></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card shadow h-100">
+            <div class="card-header">
+                <i class="bi bi-bar-chart"></i> Revenue vs Expenses
+            </div>
+            <div class="card-body">
+                <div id="revenueExpenseChart"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Transactions Table -->
+<div class="card shadow">
+    <div class="card-header">
+        <i class="bi bi-receipt"></i> Transaction Details
+    </div>
+    <div class="card-body">
+        @if (Model.Transactions != null && Model.Transactions.Any())
+        {
+            <div class="table-responsive">
+                <table id="transactionsTable" class="table table-hover table-striped">
+                    <thead>
+                        <tr>
+                            <th>Transaction #</th>
+                            <th>Customer</th>
+                            <th>Time</th>
+                            <th>Amount</th>
+                            <th>Type</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var transaction in Model.Transactions)
+                        {
+                            <tr>
+                                <td><strong>@transaction.TransactionNumber</strong></td>
+                                <td>@transaction.CustomerName</td>
+                                <td>@transaction.TransactionDate.ToString("HH:mm")</td>
+                                <td><span class="badge bg-success">$@transaction.Amount.ToString("F2")</span></td>
+                                <td>
+                                    @if (transaction.IsCredit)
+                                    {
+                                        <span class="badge bg-warning text-dark">Credit</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-success">Cash</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i> No transactions recorded for this date.
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .border-left-success {
+        border-left: 4px solid #1cc88a !important;
+    }
+    .border-left-danger {
+        border-left: 4px solid #e74a3b !important;
+    }
+    .border-left-info {
+        border-left: 4px solid #36b9cc !important;
+    }
+    .border-left-warning {
+        border-left: 4px solid #f6c23e !important;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Initialize DataTable
+            if ($.fn.DataTable.isDataTable('#transactionsTable')) {
+                $('#transactionsTable').DataTable().destroy();
+            }
+            $('#transactionsTable').DataTable({
+                order: [[2, 'desc']],
+                pageLength: 10,
+                lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]]
+            });
+
+            // Transaction Type Chart (Pie)
+            var cashCount = @Model.Transactions.Count(t => !t.IsCredit);
+            var creditCount = @Model.Transactions.Count(t => t.IsCredit);
+
+            Highcharts.chart('transactionTypeChart', {
+                chart: {
+                    type: 'pie',
+                    height: 300
+                },
+                title: {
+                    text: 'Cash vs Credit Transactions'
+                },
+                plotOptions: {
+                    pie: {
+                        allowPointSelect: true,
+                        cursor: 'pointer',
+                        dataLabels: {
+                            enabled: true,
+                            format: '<b>{point.name}</b>: {point.percentage:.1f} %'
+                        },
+                        showInLegend: true
+                    }
+                },
+                series: [{
+                    name: 'Transactions',
+                    colorByPoint: true,
+                    data: [{
+                        name: 'Cash',
+                        y: cashCount,
+                        color: '#1cc88a'
+                    }, {
+                        name: 'Credit',
+                        y: creditCount,
+                        color: '#f6c23e'
+                    }]
+                }],
+                credits: {
+                    enabled: false
+                }
+            });
+
+            // Revenue vs Expense Chart (Bar)
+            Highcharts.chart('revenueExpenseChart', {
+                chart: {
+                    type: 'column',
+                    height: 300
+                },
+                title: {
+                    text: 'Financial Overview'
+                },
+                xAxis: {
+                    categories: ['Revenue', 'Expenses', 'Profit']
+                },
+                yAxis: {
+                    min: 0,
+                    title: {
+                        text: 'Amount ($)'
+                    },
+                    labels: {
+                        formatter: function() {
+                            return '$' + this.value.toLocaleString();
+                        }
+                    }
+                },
+                legend: {
+                    enabled: false
+                },
+                plotOptions: {
+                    column: {
+                        colorByPoint: true,
+                        dataLabels: {
+                            enabled: true,
+                            formatter: function() {
+                                return '$' + this.y.toLocaleString();
+                            }
+                        }
+                    }
+                },
+                colors: ['#1cc88a', '#e74a3b', '#36b9cc'],
+                series: [{
+                    name: 'Amount',
+                    data: [@Model.TotalSales, @Model.TotalExpenses, @Model.TotalProfit]
+                }],
+                credits: {
+                    enabled: false
+                }
+            });
+        });
+    </script>
+}

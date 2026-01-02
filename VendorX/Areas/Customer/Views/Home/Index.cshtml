@@ -1,0 +1,172 @@
+@{
+    ViewData["Title"] = "Customer Dashboard";
+}
+
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">
+            <i class="fas fa-tachometer-alt"></i> Customer Dashboard
+        </h1>
+        <p class="lead">Welcome to VendorX Customer Portal</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 col-lg-3 mb-4">
+        <div class="card bg-primary text-white shadow">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-uppercase mb-1">My Shops</h6>
+                        <h2 class="mb-0">@ViewBag.ShopCount</h2>
+                    </div>
+                    <i class="fas fa-store fa-3x opacity-50"></i>
+                </div>
+            </div>
+            <div class="card-footer bg-primary bg-opacity-75">
+                <a href="@Url.Action("Index", "Shops", new { area = "Customer" })" class="text-white text-decoration-none">
+                    View Shops <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-3 mb-4">
+        <div class="card bg-success text-white shadow">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-uppercase mb-1">Total Purchases</h6>
+                        <h2 class="mb-0">@ViewBag.PurchaseCount</h2>
+                    </div>
+                    <i class="fas fa-shopping-cart fa-3x opacity-50"></i>
+                </div>
+            </div>
+            <div class="card-footer bg-success bg-opacity-75">
+                <small>Lifetime purchases</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-3 mb-4">
+        <div class="card bg-warning text-dark shadow">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-uppercase mb-1">Total Baki</h6>
+                        <h2 class="mb-0">@ViewBag.TotalBaki.ToString("C")</h2>
+                    </div>
+                    <i class="fas fa-credit-card fa-3x opacity-50"></i>
+                </div>
+            </div>
+            <div class="card-footer bg-warning bg-opacity-75">
+                <a href="@Url.Action("History", "Baki", new { area = "Customer" })" class="text-dark text-decoration-none">
+                    View Baki <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-3 mb-4">
+        <div class="card bg-info text-white shadow">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-uppercase mb-1">Pending Orders</h6>
+                        <h2 class="mb-0">@ViewBag.PendingOrders</h2>
+                    </div>
+                    <i class="fas fa-box fa-3x opacity-50"></i>
+                </div>
+            </div>
+            <div class="card-footer bg-info bg-opacity-75">
+                <small>Orders in progress</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (ViewBag.ShopCount == 0)
+{
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="alert alert-info alert-dismissible fade show" role="alert">
+                <h5 class="alert-heading"><i class="bi bi-info-circle"></i> Get Started!</h5>
+                <p>You're not registered to any shops yet. To start shopping and tracking your purchases:</p>
+                <ol class="mb-0">
+                    <li>Ask the shopkeeper for their shop's QR code</li>
+                    <li>Scan the QR code to register to their shop</li>
+                    <li>Start making purchases and track your Baki (credit)</li>
+                </ol>
+                <hr>
+                <p class="mb-0">
+                    <strong>Or</strong> visit the shop and they will add you directly through their customer management system.
+                </p>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card shadow mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-tasks"></i> Quick Actions</h5>
+            </div>
+            <div class="list-group list-group-flush">
+                <a href="@Url.Action("Index", "Shops", new { area = "Customer" })" class="list-group-item list-group-item-action">
+                    <i class="fas fa-store text-primary"></i> <strong>View My Shops</strong>
+                    <span class="badge bg-primary rounded-pill float-end">@ViewBag.ShopCount</span>
+                </a>
+                <div class="list-group-item">
+                    <i class="fas fa-qrcode text-success"></i> <strong>Register to New Shop</strong>
+                    <p class="mb-0 mt-2 text-muted small">Scan the QR code provided by the shop to register</p>
+                </div>
+                <a href="@Url.Action("History", "Baki", new { area = "Customer" })" class="list-group-item list-group-item-action">
+                    <i class="fas fa-history text-info"></i> View Purchase History
+                    <span class="badge bg-success rounded-pill float-end">@ViewBag.PurchaseCount</span>
+                </a>
+                <a href="@Url.Action("Summary", "Baki", new { area = "Customer" })" class="list-group-item list-group-item-action">
+                    <i class="fas fa-chart-pie text-warning"></i> View Baki Summary
+                    @if (ViewBag.TotalBaki > 0)
+                    {
+                        <span class="badge bg-warning text-dark rounded-pill float-end">@ViewBag.TotalBaki.ToString("C")</span>
+                    }
+                </a>
+                <a href="@Url.Action("Alerts", "Baki", new { area = "Customer" })" class="list-group-item list-group-item-action">
+                    <i class="fas fa-bell text-danger"></i> View Baki Invoices
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow mb-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="fas fa-info-circle"></i> How It Works</h5>
+            </div>
+            <div class="card-body">
+                <h6><i class="fas fa-qrcode"></i> Register to Shops</h6>
+                <p class="small">Scan the shop's QR code to register and start shopping.</p>
+
+                <h6><i class="fas fa-shopping-bag"></i> Make Purchases</h6>
+                <p class="small">Shop will process your purchases instantly or create orders.</p>
+
+                <h6><i class="fas fa-credit-card"></i> Track Baki</h6>
+                <p class="small">View all your credit purchases (Baki) across different shops.</p>
+
+                <h6><i class="fas fa-envelope"></i> Get Notifications</h6>
+                <p class="small mb-0">Receive updates via email and WhatsApp for all transactions.</p>
+            </div>
+        </div>
+
+        <div class="card shadow">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0"><i class="fas fa-bell"></i> Notifications</h5>
+            </div>
+            <div class="card-body">
+                <p class="mb-0 small text-center text-muted">No new notifications</p>
+            </div>
+        </div>
+    </div>
+</div>

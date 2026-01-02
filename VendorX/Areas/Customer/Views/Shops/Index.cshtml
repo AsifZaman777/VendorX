@@ -1,0 +1,62 @@
+@using VendorX.Models
+@model List<Shop>
+
+@{
+    ViewData["Title"] = "My Shops";
+}
+
+<div class="container-fluid mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h3 class="mb-0"><i class="bi bi-shop-window"></i> My Registered Shops</h3>
+        </div>
+        <div class="card-body">
+            @if (Model == null || !Model.Any())
+            {
+                <div class="alert alert-info text-center">
+                    <i class="bi bi-info-circle"></i> You are not registered with any shops yet. Scan a shop QR code to register.
+                </div>
+            }
+            else
+            {
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                    @foreach (var shop in Model)
+                    {
+                        <div class="col">
+                            <div class="card h-100 shadow-sm">
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        <i class="bi bi-shop"></i> @shop.ShopName
+                                    </h5>
+                                    <p class="card-text">
+                                        <small class="text-muted">
+                                            <i class="bi bi-geo-alt"></i> @(shop.Address ?? "No address")
+                                        </small>
+                                    </p>
+                                    <p class="card-text">
+                                        <small>
+                                            <i class="bi bi-telephone"></i> @(shop.PhoneNumber ?? "No phone")
+                                        </small>
+                                    </p>
+                                </div>
+                                <div class="card-footer bg-transparent">
+                                    <div class="btn-group w-100" role="group">
+                                        <a asp-action="Details" asp-route-id="@shop.ShopId" class="btn btn-sm btn-info">
+                                            <i class="bi bi-eye"></i> Details
+                                        </a>
+                                        <a asp-action="Purchases" asp-route-shopId="@shop.ShopId" class="btn btn-sm btn-success">
+                                            <i class="bi bi-cart"></i> Purchases
+                                        </a>
+                                        <a asp-action="Orders" asp-route-shopId="@shop.ShopId" class="btn btn-sm btn-warning">
+                                            <i class="bi bi-bag"></i> Orders
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>

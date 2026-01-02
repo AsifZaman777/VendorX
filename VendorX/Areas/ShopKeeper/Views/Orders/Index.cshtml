@@ -1,0 +1,149 @@
+@using VendorX.Models
+@using VendorX.Models.Enums
+@model List<Order>
+
+@{
+    ViewData["Title"] = "Orders";
+    var statusFilter = ViewBag.StatusFilter as OrderStatus?;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0 text-gray-800">
+        <i class="bi bi-bag-check"></i> Orders Management
+    </h1>
+    <a asp-action="Create" class="btn btn-info">
+        <i class="bi bi-plus-circle"></i> New Order
+    </a>
+</div>
+
+<!-- Filter Card -->
+<div class="card shadow mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label fw-bold">Filter by Status</label>
+                <select name="status" class="form-select">
+                    <option value="">All Orders</option>
+                    <option value="@((int)OrderStatus.Pending)" selected="@(statusFilter == OrderStatus.Pending)">Pending</option>
+                    <option value="@((int)OrderStatus.Delivered)" selected="@(statusFilter == OrderStatus.Delivered)">Delivered</option>
+                    <option value="@((int)OrderStatus.Cancelled)" selected="@(statusFilter == OrderStatus.Cancelled)">Cancelled</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-funnel"></i> Filter
+                </button>
+            </div>
+            <div class="col-md-6">
+                <div class="row g-2">
+                    <div class="col">
+                        <div class="card border-left-warning">
+                            <div class="card-body py-2">
+                                <small class="text-muted">Pending</small>
+                                <h5 class="mb-0">@Model.Count(o => o.Status == OrderStatus.Pending)</h5>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="card border-left-success">
+                            <div class="card-body py-2">
+                                <small class="text-muted">Delivered</small>
+                                <h5 class="mb-0">@Model.Count(o => o.Status == OrderStatus.Delivered)</h5>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="card border-left-danger">
+                            <div class="card-body py-2">
+                                <small class="text-muted">Cancelled</small>
+                                <h5 class="mb-0">@Model.Count(o => o.Status == OrderStatus.Cancelled)</h5>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow">
+    <div class="card-header">
+        <i class="bi bi-list"></i> All Orders
+    </div>
+    <div class="card-body">
+        @if (Model == null || !Model.Any())
+        {
+            <div class="alert alert-info text-center">
+                <i class="bi bi-info-circle"></i> No orders found.
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table id="ordersTable" class="table table-hover table-striped">
+                    <thead>
+                        <tr>
+                            <th>Order #</th>
+                            <th>Customer</th>
+                            <th>Order Date</th>
+                            <th>Delivery Date</th>
+                            <th>Total Amount</th>
+                            <th>Status</th>
+                            <th width="100">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var order in Model)
+                        {
+                            <tr>
+                                <td><strong>@order.OrderNumber</strong></td>
+                                <td>@order.Customer?.FullName</td>
+                                <td>@order.OrderDate.ToString("MMM dd, yyyy")</td>
+                                <td>@(order.DeliveryDate?.ToString("MMM dd, yyyy") ?? "Not delivered")</td>
+                                <td><span class="badge bg-primary fs-6">@order.TotalAmount</span></td>
+                                <td>
+                                    @switch (order.Status)
+                                    {
+                                        case OrderStatus.Pending:
+                                            <span class="badge bg-warning text-dark">Pending</span>
+                                            break;
+                                        case OrderStatus.Delivered:
+                                            <span class="badge bg-success">Delivered</span>
+                                            break;
+                                        case OrderStatus.Cancelled:
+                                            <span class="badge bg-danger">Cancelled</span>
+                                            break;
+                                    }
+                                </td>
+                                <td>
+                                    <a asp-action="Details" asp-route-id="@order.OrderId" class="btn btn-sm btn-info">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .border-left-warning { border-left: 4px solid #f6c23e !important; }
+    .border-left-success { border-left: 4px solid #1cc88a !important; }
+    .border-left-danger { border-left: 4px solid #e74a3b !important; }
+</style>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('#ordersTable').DataTable({
+                order: [[2, 'desc']],
+                columnDefs: [
+                    { orderable: false, targets: [6] }
+                ]
+            });
+        });
+    </script>
+}

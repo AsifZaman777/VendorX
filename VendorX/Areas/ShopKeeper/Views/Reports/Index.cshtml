@@ -1,0 +1,164 @@
+@{
+    ViewData["Title"] = "Reports Dashboard";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0 text-gray-800">
+        <i class="bi bi-graph-up"></i> Reports & Analytics
+    </h1>
+</div>
+
+<div class="alert alert-info shadow-sm mb-4">
+    <i class="bi bi-info-circle"></i> <strong>Welcome to Reports!</strong> 
+    Access comprehensive business reports and analytics to track your shop's performance.
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="card shadow-sm h-100 border-0 hover-lift">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="icon-circle bg-primary-soft me-3">
+                        <i class="bi bi-calendar-day fs-3 text-primary"></i>
+                    </div>
+                    <div>
+                        <h4 class="mb-0">Daily Report</h4>
+                        <small class="text-muted">View today's performance</small>
+                    </div>
+                </div>
+                <p class="text-muted mb-3">
+                    Track daily sales, expenses, profit, and transaction details. Monitor your business performance in real-time.
+                </p>
+                <ul class="list-unstyled mb-3">
+                    <li><i class="bi bi-check-circle text-success"></i> Total Sales & Transactions</li>
+                    <li><i class="bi bi-check-circle text-success"></i> Expenses Breakdown</li>
+                    <li><i class="bi bi-check-circle text-success"></i> Net Profit Calculation</li>
+                    <li><i class="bi bi-check-circle text-success"></i> Visual Charts</li>
+                </ul>
+                <a asp-action="Daily" class="btn btn-primary w-100">
+                    <i class="bi bi-arrow-right-circle"></i> View Daily Report
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card shadow-sm h-100 border-0 hover-lift">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="icon-circle bg-warning-soft me-3">
+                        <i class="bi bi-wallet2 fs-3 text-warning"></i>
+                    </div>
+                    <div>
+                        <h4 class="mb-0">Baki Report</h4>
+                        <small class="text-muted">Credit management</small>
+                    </div>
+                </div>
+                <p class="text-muted mb-3">
+                    Monitor outstanding and settled baki records. Identify customers with pending payments and track credit trends.
+                </p>
+                <ul class="list-unstyled mb-3">
+                    <li><i class="bi bi-check-circle text-success"></i> Outstanding vs Settled</li>
+                    <li><i class="bi bi-check-circle text-success"></i> Customer-wise Breakdown</li>
+                    <li><i class="bi bi-check-circle text-success"></i> Payment Tracking</li>
+                    <li><i class="bi bi-check-circle text-success"></i> Visual Analytics</li>
+                </ul>
+                <a asp-action="Baki" class="btn btn-warning w-100">
+                    <i class="bi bi-arrow-right-circle"></i> View Baki Report
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card shadow-sm h-100 border-0 hover-lift">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="icon-circle bg-danger-soft me-3">
+                        <i class="bi bi-cash-stack fs-3 text-danger"></i>
+                    </div>
+                    <div>
+                        <h4 class="mb-0">Expense Report</h4>
+                        <small class="text-muted">Cost analysis</small>
+                    </div>
+                </div>
+                <p class="text-muted mb-3">
+                    Analyze all business expenses by category and time period. Identify spending patterns and optimize costs.
+                </p>
+                <ul class="list-unstyled mb-3">
+                    <li><i class="bi bi-check-circle text-success"></i> Category-wise Breakdown</li>
+                    <li><i class="bi bi-check-circle text-success"></i> Expense Trends</li>
+                    <li><i class="bi bi-check-circle text-success"></i> Cost Analysis</li>
+                    <li><i class="bi bi-check-circle text-success"></i> Detailed Reports</li>
+                </ul>
+                <a asp-action="Expense" class="btn btn-danger w-100">
+                    <i class="bi bi-arrow-right-circle"></i> View Expense Report
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card shadow-sm h-100 border-0 hover-lift">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="icon-circle bg-success-soft me-3">
+                        <i class="bi bi-graph-up-arrow fs-3 text-success"></i>
+                    </div>
+                    <div>
+                        <h4 class="mb-0">Profit & Loss Report</h4>
+                        <small class="text-muted">Financial analysis</small>
+                    </div>
+                </div>
+                <p class="text-muted mb-3">
+                    Comprehensive profit and loss analysis. Compare revenue vs expenses and calculate your business profitability.
+                </p>
+                <ul class="list-unstyled mb-3">
+                    <li><i class="bi bi-check-circle text-success"></i> Revenue Tracking</li>
+                    <li><i class="bi bi-check-circle text-success"></i> Expense Monitoring</li>
+                    <li><i class="bi bi-check-circle text-success"></i> Net Profit Analysis</li>
+                    <li><i class="bi bi-check-circle text-success"></i> Profit Margin Insights</li>
+                </ul>
+                <a asp-action="ProfitExpense" class="btn btn-success w-100">
+                    <i class="bi bi-arrow-right-circle"></i> View P&L Report
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .icon-circle {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .bg-primary-soft {
+        background-color: rgba(78, 115, 223, 0.1);
+    }
+    
+    .bg-warning-soft {
+        background-color: rgba(246, 194, 62, 0.1);
+    }
+    
+    .bg-danger-soft {
+        background-color: rgba(231, 74, 59, 0.1);
+    }
+    
+    .bg-success-soft {
+        background-color: rgba(28, 200, 138, 0.1);
+    }
+    
+    .hover-lift {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .hover-lift:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.1) !important;
+    }
+</style>

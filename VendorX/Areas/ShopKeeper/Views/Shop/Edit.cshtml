@@ -1,0 +1,85 @@
+@model ShopViewModel
+
+@{
+    ViewData["Title"] = "Edit Shop";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark">
+                    <h3 class="mb-0"><i class="bi bi-pencil-square"></i> Edit Shop Details</h3>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Edit" method="post">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                        
+                        <input type="hidden" asp-for="ShopId" />
+                        <input type="hidden" asp-for="QRCode" />
+                        <input type="hidden" asp-for="ShopCode" />
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Shop Code</label>
+                            <input type="text" class="form-control-plaintext" value="@Model.ShopCode" readonly />
+                            <small class="text-muted">This code is used for customer registration</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="ShopName" class="form-label"></label>
+                            <input asp-for="ShopName" class="form-control" placeholder="Enter shop name" />
+                            <span asp-validation-for="ShopName" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Address" class="form-label"></label>
+                            <textarea asp-for="Address" class="form-control" rows="3" placeholder="Enter shop address"></textarea>
+                            <span asp-validation-for="Address" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="PhoneNumber" class="form-label"></label>
+                            <input asp-for="PhoneNumber" class="form-control" placeholder="Enter phone number" />
+                            <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label"></label>
+                            <input asp-for="Email" class="form-control" placeholder="Enter email address" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-check mb-3">
+                            <input asp-for="IsActive" class="form-check-input" type="checkbox" />
+                            <label asp-for="IsActive" class="form-check-label"></label>
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(Model.QRCode))
+                        {
+                            <div class="mb-3 text-center">
+                                <label class="form-label fw-bold">Shop QR Code</label>
+                                <div>
+                                    <img src="@Model.QRCode" alt="Shop QR Code" class="img-thumbnail" style="max-width: 200px;" />
+                                </div>
+                                <small class="text-muted">Customers can scan this QR code to register</small>
+                            </div>
+                        }
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-warning btn-lg">
+                                <i class="bi bi-save"></i> Save Changes
+                            </button>
+                            <a asp-area="ShopKeeper" asp-controller="Home" asp-action="Index" class="btn btn-secondary">
+                                <i class="bi bi-x-circle"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

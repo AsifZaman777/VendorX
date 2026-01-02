@@ -1,0 +1,230 @@
+@model ProfitExpenseReportViewModel
+
+@{
+    ViewData["Title"] = "Profit & Loss Report";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0 text-gray-800">
+        <i class="bi bi-graph-up-arrow"></i> Profit & Loss Report
+    </h1>
+    <a asp-action="Index" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Back to Reports
+    </a>
+</div>
+
+<!-- Date Range Selector -->
+<div class="card shadow mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label fw-bold">From Date</label>
+                <input type="date" name="fromDate" class="form-control" value="@Model.FromDate.ToString("yyyy-MM-dd")" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-bold">To Date</label>
+                <input type="date" name="toDate" class="form-control" value="@Model.ToDate.ToString("yyyy-MM-dd")" />
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-search"></i> Generate Report
+                </button>
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+                <div class="alert alert-info mb-0 w-100">
+                    <strong>Period:</strong> @Model.FromDate.ToString("MMM dd, yyyy") to @Model.ToDate.ToString("MMM dd, yyyy")
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Financial Summary Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card border-left-success shadow h-100">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Total Revenue</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">$@Model.TotalRevenue.ToString("F2")</div>
+                        <small class="text-muted">Sales Income</small>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-currency-dollar fs-2 text-success"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card border-left-danger shadow h-100">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Total Expenses</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">$@Model.TotalExpenses.ToString("F2")</div>
+                        <small class="text-muted">Operating Costs</small>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-cash-stack fs-2 text-danger"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card @(Model.NetProfit >= 0 ? "border-left-info" : "border-left-warning") shadow h-100">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold @(Model.NetProfit >= 0 ? "text-info" : "text-warning") text-uppercase mb-1">Net Profit</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">$@Model.NetProfit.ToString("F2")</div>
+                        <small class="text-muted">@(Model.NetProfit >= 0 ? "Profit" : "Loss")</small>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-graph-up-arrow fs-2 @(Model.NetProfit >= 0 ? "text-info" : "text-warning")"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card border-left-info shadow h-100">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Profit Margin</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.ProfitMargin.ToString("F1")%</div>
+                        <small class="text-muted">Efficiency</small>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-percent fs-2 text-info"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Visual Breakdown -->
+<div class="row g-3 mb-4">
+    <div class="col-lg-6">
+        <div class="card shadow h-100">
+            <div class="card-header">
+                <i class="bi bi-bar-chart"></i> Financial Breakdown
+            </div>
+            <div class="card-body">
+                <table class="table table-borderless mb-3">
+                    <tbody>
+                        <tr>
+                            <td><strong>Revenue</strong></td>
+                            <td class="text-end">
+                                <span class="badge bg-success">$@Model.TotalRevenue.ToString("F2")</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Expenses</strong></td>
+                            <td class="text-end">
+                                <span class="badge bg-danger">$@Model.TotalExpenses.ToString("F2")</span>
+                            </td>
+                        </tr>
+                        <tr class="table-light">
+                            <td><strong>Net Profit/Loss</strong></td>
+                            <td class="text-end">
+                                <span class="badge @(Model.NetProfit >= 0 ? "bg-info" : "bg-warning")">
+                                    $@Model.NetProfit.ToString("F2")
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- Progress Bar Visualization -->
+                <div class="mt-3">
+                    <label class="form-label"><strong>Expense Ratio:</strong></label>
+                    <div class="progress" style="height: 30px;">
+                        @{
+                            var expensePercentage = Model.TotalRevenue > 0 ? (Model.TotalExpenses / Model.TotalRevenue * 100) : 0;
+                            var profitPercentage = 100 - expensePercentage;
+                        }
+                        <div class="progress-bar bg-danger" role="progressbar" style="width: @expensePercentage%">
+                            @if (expensePercentage > 10)
+                            {
+                                <span>Expenses @expensePercentage.ToString("F1")%</span>
+                            }
+                        </div>
+                        <div class="progress-bar bg-success" role="progressbar" style="width: @profitPercentage%">
+                            @if (profitPercentage > 10)
+                            {
+                                <span>Profit @profitPercentage.ToString("F1")%</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card shadow h-100">
+            <div class="card-header">
+                <i class="bi bi-lightbulb"></i> Performance Insights
+            </div>
+            <div class="card-body">
+                @if (Model.NetProfit >= 0)
+                {
+                    <div class="alert alert-success">
+                        <i class="bi bi-check-circle"></i> <strong>Profitable Period!</strong>
+                        <p class="mb-0 mt-2">Your business generated a profit of <strong>$@Model.NetProfit.ToString("F2")</strong> during this period.</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle"></i> <strong>Loss Period</strong>
+                        <p class="mb-0 mt-2">Your expenses exceeded revenue by <strong>$@Math.Abs(Model.NetProfit).ToString("F2")</strong> during this period.</p>
+                    </div>
+                }
+
+                <h6 class="mt-3">Recommendations:</h6>
+                <ul class="list-unstyled">
+                    @if (Model.NetProfit < 0)
+                    {
+                        <li><i class="bi bi-arrow-right text-danger"></i> Review and reduce unnecessary expenses</li>
+                        <li><i class="bi bi-arrow-right text-danger"></i> Focus on increasing sales revenue</li>
+                        <li><i class="bi bi-arrow-right text-danger"></i> Analyze pricing strategy</li>
+                    }
+                    else if (expensePercentage > 70)
+                    {
+                        <li><i class="bi bi-arrow-right text-warning"></i> Expense ratio is high (@expensePercentage.ToString("F1")%)</li>
+                        <li><i class="bi bi-arrow-right text-warning"></i> Look for cost optimization opportunities</li>
+                    }
+                    else
+                    {
+                        <li><i class="bi bi-arrow-right text-success"></i> Maintain current expense management</li>
+                        <li><i class="bi bi-arrow-right text-success"></i> Continue monitoring profitability</li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .border-left-success {
+        border-left: 4px solid #1cc88a !important;
+    }
+    .border-left-danger {
+        border-left: 4px solid #e74a3b !important;
+    }
+    .border-left-info {
+        border-left: 4px solid #36b9cc !important;
+    }
+    .border-left-warning {
+        border-left: 4px solid #f6c23e !important;
+    }
+</style>

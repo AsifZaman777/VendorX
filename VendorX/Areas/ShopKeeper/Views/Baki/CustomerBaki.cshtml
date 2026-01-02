@@ -1,0 +1,76 @@
+@using VendorX.ViewModels
+@using VendorX.Models.Enums
+@model List<BakiViewModel>
+
+@{
+    ViewData["Title"] = "Customer Baki";
+    var customerName = ViewBag.CustomerName as string;
+}
+
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-warning text-dark">
+            <h3 class="mb-0"><i class="bi bi-person-badge"></i> Baki Records for @customerName</h3>
+        </div>
+        <div class="card-body">
+            @if (Model == null || !Model.Any())
+            {
+                <div class="alert alert-info text-center">
+                    <i class="bi bi-info-circle"></i> No baki records found for this customer.
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Amount</th>
+                                <th>Description</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var baki in Model)
+                            {
+                                <tr>
+                                    <td>@baki.CreatedAt.ToString("MMM dd, yyyy")</td>
+                                    <td>
+                                        @if (baki.TransactionType == TransactionType.Purchase)
+                                        {
+                                            <span class="badge bg-danger">Purchase</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-success">Payment</span>
+                                        }
+                                    </td>
+                                    <td>@(baki.Amount)</td>
+                                    <td>@(baki.Description ?? "N/A")</td>
+                                    <td>
+                                        @if (baki.Status == BakiStatus.Due)
+                                        {
+                                            <span class="badge bg-danger">Due</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-success">Settled</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            
+            <div class="mt-3">
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Back to All Baki
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

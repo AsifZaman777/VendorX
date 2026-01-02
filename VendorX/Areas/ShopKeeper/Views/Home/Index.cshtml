@@ -1,0 +1,344 @@
+@using VendorX.Models
+
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0 text-gray-800">
+            <i class="bi bi-speedometer2"></i> ShopKeeper Dashboard
+        </h1>
+        @if (ViewBag.ShopName != null)
+        {
+            <p class="text-muted mb-0">Welcome to <strong>@ViewBag.ShopName</strong></p>
+        }
+    </div>
+    <div class="text-end">
+        <small class="text-muted d-block">@DateTime.Now.ToString("dddd, MMMM dd, yyyy")</small>
+        <small class="text-muted">@DateTime.Now.ToString("hh:mm tt")</small>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-xl-3 col-md-6">
+        <div class="card border-left-primary shadow h-100">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Today's Sales</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">@ViewBag.TodaySales</div>
+                        <small class="text-muted">@ViewBag.TodayTransactions Transactions</small>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-currency-dollar fs-2 text-primary"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer bg-white py-2">
+                <a href="@Url.Action("Daily", "Reports")" class="text-primary text-decoration-none small">
+                    View Daily Report <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="card border-left-success shadow h-100">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Pending Orders</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">@ViewBag.PendingOrders</div>
+                        <small class="text-muted">Awaiting Delivery</small>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-bag-check fs-2 text-success"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer bg-white py-2">
+                <a href="@Url.Action("Index", "Orders")" class="text-success text-decoration-none small">
+                    Manage Orders <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="card border-left-warning shadow h-100">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Total Baki</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">@ViewBag.TotalBaki</div>
+                        <small class="text-muted">Outstanding Credit</small>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-wallet2 fs-2 text-warning"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer bg-white py-2">
+                <a href="@Url.Action("Index", "Baki")" class="text-warning text-decoration-none small">
+                    Manage Baki <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="card border-left-info shadow h-100">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Total Customers</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">@ViewBag.TotalCustomers</div>
+                        <small class="text-muted">Registered</small>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-people fs-2 text-info"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer bg-white py-2">
+                <a href="@Url.Action("Index", "Customers")" class="text-info text-decoration-none small">
+                    View Customers <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row -->
+<div class="row mb-4">
+    <!-- Sales Trend Chart -->
+    <div class="col-lg-8 mb-4">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <i class="bi bi-graph-up"></i> Sales Trend (Last 7 Days)
+            </div>
+            <div class="card-body">
+                <div id="salesChart" style="height: 300px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Products -->
+    <div class="col-lg-4 mb-4">
+        <div class="card shadow h-100">
+            <div class="card-header bg-success text-white">
+                <i class="bi bi-star"></i> Top Products (30 Days)
+            </div>
+            <div class="card-body" style="max-height: 300px; overflow-y: auto;">
+                @if (ViewBag.TopProducts != null && ViewBag.TopProducts.Count > 0)
+                {
+                    <div class="list-group list-group-flush">
+                        @foreach (var product in ViewBag.TopProducts)
+                        {
+                            <div class="list-group-item px-0 py-2">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>@product.ProductName</strong>
+                                        <small class="d-block text-muted">Sold: @product.TotalSold units</small>
+                                    </div>
+                                    <span class="badge bg-success">@product.Revenue.ToString("C")</span>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted text-center mb-0">No sales data available</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <!-- Quick Actions -->
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow">
+            <div class="card-header">
+                <i class="bi bi-lightning-charge"></i> Quick Actions
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <a href="@Url.Action("Index", "POS")" class="btn btn-primary w-100 btn-lg">
+                            <i class="bi bi-cart-check d-block fs-2 mb-2"></i>
+                            <strong>POS System</strong>
+                            <small class="d-block">Process Sale</small>
+                        </a>
+                    </div>
+                    <div class="col-md-4">
+                        <a href="@Url.Action("Create", "Orders")" class="btn btn-success w-100 btn-lg">
+                            <i class="bi bi-plus-circle d-block fs-2 mb-2"></i>
+                            <strong>New Order</strong>
+                            <small class="d-block">Create Order</small>
+                        </a>
+                    </div>
+                    <div class="col-md-4">
+                        <a href="@Url.Action("Index", "Products")" class="btn btn-info w-100 btn-lg">
+                            <i class="bi bi-box-seam d-block fs-2 mb-2"></i>
+                            <strong>Products</strong>
+                            <small class="d-block">Manage Inventory</small>
+                        </a>
+                    </div>
+                </div>
+                
+                <hr class="my-3" />
+                
+                <div class="row g-2">
+                    <div class="col-md-3">
+                        <a href="@Url.Action("Index", "Categories")" class="btn btn-outline-secondary w-100">
+                            <i class="bi bi-tags"></i> Categories
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="@Url.Action("Index", "Customers")" class="btn btn-outline-secondary w-100">
+                            <i class="bi bi-people"></i> Customers
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="@Url.Action("CreateInvoice", "Baki")" class="btn btn-outline-secondary w-100">
+                            <i class="bi bi-file-earmark-text"></i> Invoice
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="@Url.Action("Index", "Reports")" class="btn btn-outline-secondary w-100">
+                            <i class="bi bi-graph-up"></i> Reports
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Transactions -->
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow h-100">
+            <div class="card-header bg-info text-white">
+                <i class="bi bi-clock-history"></i> Recent Transactions
+            </div>
+            <div class="card-body" style="max-height: 300px; overflow-y: auto;">
+                @if (ViewBag.RecentTransactions != null && ViewBag.RecentTransactions.Count > 0)
+                {
+                    <div class="list-group list-group-flush">
+                        @foreach (var transaction in ViewBag.RecentTransactions)
+                        {
+                            <div class="list-group-item px-0 py-2">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>@transaction.TransactionNumber</strong>
+                                        <small class="d-block text-muted">@transaction.CustomerName</small>
+                                        <small class="text-muted">@transaction.TransactionDate.ToString("MMM dd, hh:mm tt")</small>
+                                    </div>
+                                    <span class="badge bg-primary">@transaction.TotalAmount.ToString("C")</span>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted text-center mb-0">No recent transactions</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Low Stock Alert -->
+@if (ViewBag.LowStockProducts != null && ViewBag.LowStockProducts.Count > 0)
+{
+    <div class="alert alert-warning shadow-sm">
+        <h5 class="alert-heading"><i class="bi bi-exclamation-triangle"></i> Low Stock Alert</h5>
+        <p class="mb-2"><strong>The following products are running low on stock:</strong></p>
+        <ul class="mb-0">
+            @foreach (var product in ViewBag.LowStockProducts)
+            {
+                <li>@product.ProductName - <strong class="text-danger">@product.StockQuantity units remaining</strong></li>
+            }
+        </ul>
+    </div>
+}
+
+<!-- Tips & Shortcuts -->
+<div class="alert alert-info shadow-sm">
+    <h5 class="alert-heading"><i class="bi bi-lightbulb"></i> Quick Tip</h5>
+    <p class="mb-0">
+        <strong>Did you know?</strong> You can quickly access the POS system using the sidebar or create orders for future delivery. 
+        All transactions automatically send notifications to customers via email and WhatsApp!
+    </p>
+</div>
+
+@section Scripts {
+    <script>
+        // Sales Chart
+        Highcharts.chart('salesChart', {
+            chart: {
+                type: 'area'
+            },
+            title: {
+                text: null
+            },
+            xAxis: {
+                categories: @Html.Raw(ViewBag.ChartLabels)
+            },
+            yAxis: {
+                title: {
+                    text: 'Sales Amount ($)'
+                }
+            },
+            legend: {
+                enabled: false
+            },
+            plotOptions: {
+                area: {
+                    fillColor: {
+                        linearGradient: {
+                            x1: 0,
+                            y1: 0,
+                            x2: 0,
+                            y2: 1
+                        },
+                        stops: [
+                            [0, 'rgba(78, 115, 223, 0.5)'],
+                            [1, 'rgba(78, 115, 223, 0.05)']
+                        ]
+                    },
+                    marker: {
+                        radius: 4
+                    },
+                    lineWidth: 2,
+                    states: {
+                        hover: {
+                            lineWidth: 2
+                        }
+                    },
+                    threshold: null
+                }
+            },
+            series: [{
+                name: 'Sales',
+                data: @Html.Raw(ViewBag.ChartData),
+                color: '#4e73df'
+            }],
+            credits: {
+                enabled: false
+            }
+        });
+    </script>
+}
+
+<style>
+    .border-left-primary { border-left: 4px solid #4e73df !important; }
+    .border-left-success { border-left: 4px solid #1cc88a !important; }
+    .border-left-info { border-left: 4px solid #36b9cc !important; }
+    .border-left-warning { border-left: 4px solid #f6c23e !important; }
+    .border-left-danger { border-left: 4px solid #e74a3b !important; }
+</style>

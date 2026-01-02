@@ -1,0 +1,306 @@
+@model ExpenseReportViewModel
+
+@{
+    ViewData["Title"] = "Expense Report";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0 text-gray-800">
+        <i class="bi bi-cash-stack"></i> Expense Report
+    </h1>
+    <a asp-action="Index" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Back to Reports
+    </a>
+</div>
+
+<!-- Date Range Selector -->
+<div class="card shadow mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label fw-bold">From Date</label>
+                <input type="date" name="fromDate" class="form-control" value="@Model.FromDate.ToString("yyyy-MM-dd")" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-bold">To Date</label>
+                <input type="date" name="toDate" class="form-control" value="@Model.ToDate.ToString("yyyy-MM-dd")" />
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-search"></i> Generate Report
+                </button>
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+                <div class="alert alert-info mb-0 w-100">
+                    <strong>Period:</strong> @Model.FromDate.ToString("MMM dd, yyyy") to @Model.ToDate.ToString("MMM dd, yyyy")
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Total Expenses Card -->
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <div class="card border-left-danger shadow h-100">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Total Expenses</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">$@Model.TotalExpenses.ToString("F2")</div>
+                        <small class="text-muted">@Model.Expenses.Count Expense(s)</small>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-cash-stack fs-2 text-danger"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card border-left-info shadow h-100">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Categories</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.ExpensesByCategory.Count</div>
+                        <small class="text-muted">Different Categories</small>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-tags fs-2 text-info"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row -->
+<div class="row g-3 mb-4">
+    <div class="col-lg-6">
+        <div class="card shadow h-100">
+            <div class="card-header">
+                <i class="bi bi-pie-chart"></i> Expenses by Category
+            </div>
+            <div class="card-body">
+                <div id="expensePieChart"></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card shadow h-100">
+            <div class="card-header">
+                <i class="bi bi-bar-chart"></i> Category Breakdown
+            </div>
+            <div class="card-body">
+                <div id="expenseBarChart"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Category Summary Cards -->
+@if (Model.ExpensesByCategory != null && Model.ExpensesByCategory.Any())
+{
+    <h5 class="mb-3">Expenses by Category</h5>
+    <div class="row g-3 mb-4">
+        @foreach (var category in Model.ExpensesByCategory.OrderByDescending(c => c.Value))
+        {
+            var percentage = Model.TotalExpenses > 0 ? (category.Value / Model.TotalExpenses * 100) : 0;
+            <div class="col-md-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <h6 class="text-muted mb-2"><i class="bi bi-tag"></i> @category.Key</h6>
+                        <h5 class="text-danger mb-2">$@category.Value.ToString("F2")</h5>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-danger" style="width: @percentage%"></div>
+                        </div>
+                        <small class="text-muted">@percentage.ToString("F1")% of total expenses</small>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<!-- Detailed Expense List -->
+<div class="card shadow">
+    <div class="card-header">
+        <i class="bi bi-list"></i> Expense Details
+    </div>
+    <div class="card-body">
+        @if (Model.Expenses != null && Model.Expenses.Any())
+        {
+            <div class="table-responsive">
+                <table id="expensesTable" class="table table-hover table-striped">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Expense Name</th>
+                            <th>Category</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var expense in Model.Expenses)
+                        {
+                            <tr>
+                                <td>@expense.ExpenseDate.ToString("MMM dd, yyyy")</td>
+                                <td><strong>@expense.ExpenseName</strong></td>
+                                <td>
+                                    <span class="badge bg-secondary">@(expense.Category ?? "Uncategorized")</span>
+                                </td>
+                                <td><span class="badge bg-danger">$@expense.Amount.ToString("F2")</span></td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr class="table-light fw-bold">
+                            <td colspan="3" class="text-end">TOTAL EXPENSES:</td>
+                            <td><span class="badge bg-danger">$@Model.TotalExpenses.ToString("F2")</span></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i> No expenses recorded for this period.
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .border-left-success {
+        border-left: 4px solid #1cc88a !important;
+    }
+    .border-left-danger {
+        border-left: 4px solid #e74a3b !important;
+    }
+    .border-left-info {
+        border-left: 4px solid #36b9cc !important;
+    }
+    .border-left-warning {
+        border-left: 4px solid #f6c23e !important;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Initialize DataTable
+            if ($.fn.DataTable.isDataTable('#expensesTable')) {
+                $('#expensesTable').DataTable().destroy();
+            }
+            $('#expensesTable').DataTable({
+                order: [[0, 'desc']],
+                pageLength: 10,
+                lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]]
+            });
+
+            @if (Model.ExpensesByCategory != null && Model.ExpensesByCategory.Any())
+            {
+                <text>
+                // Get category data
+                var categoryLabels = @Html.Raw(Json.Serialize(Model.ExpensesByCategory.Keys.ToList()));
+                var categoryData = @Html.Raw(Json.Serialize(Model.ExpensesByCategory.Values.ToList()));
+                var colors = [
+                    '#e74a3b', '#f6c23e', '#1cc88a', '#36b9cc', '#858796',
+                    '#f65164', '#fd7e14', '#20c997', '#17a2b8', '#6f42c1'
+                ];
+
+                // Prepare data for pie chart
+                var pieData = categoryLabels.map(function(label, index) {
+                    return {
+                        name: label,
+                        y: categoryData[index],
+                        color: colors[index % colors.length]
+                    };
+                });
+
+                // Pie Chart
+                Highcharts.chart('expensePieChart', {
+                    chart: {
+                        type: 'pie',
+                        height: 300
+                    },
+                    title: {
+                        text: 'Distribution by Category'
+                    },
+                    plotOptions: {
+                        pie: {
+                            allowPointSelect: true,
+                            cursor: 'pointer',
+                            dataLabels: {
+                                enabled: true,
+                                format: '<b>{point.name}</b>: ${point.y:.2f}'
+                            },
+                            showInLegend: true
+                        }
+                    },
+                    series: [{
+                        name: 'Expenses',
+                        colorByPoint: true,
+                        data: pieData
+                    }],
+                    credits: {
+                        enabled: false
+                    }
+                });
+
+                // Bar Chart
+                Highcharts.chart('expenseBarChart', {
+                    chart: {
+                        type: 'column',
+                        height: 300
+                    },
+                    title: {
+                        text: 'Expenses by Category'
+                    },
+                    xAxis: {
+                        categories: categoryLabels,
+                        title: {
+                            text: 'Categories'
+                        }
+                    },
+                    yAxis: {
+                        min: 0,
+                        title: {
+                            text: 'Amount ($)'
+                        },
+                        labels: {
+                            formatter: function() {
+                                return '$' + this.value.toLocaleString();
+                            }
+                        }
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    plotOptions: {
+                        column: {
+                            dataLabels: {
+                                enabled: true,
+                                formatter: function() {
+                                    return '$' + this.y.toLocaleString();
+                                }
+                            },
+                            color: '#e74a3b'
+                        }
+                    },
+                    series: [{
+                        name: 'Amount',
+                        data: categoryData
+                    }],
+                    credits: {
+                        enabled: false
+                    }
+                });
+                </text>
+            }
+        });
+    </script>
+}

@@ -1,0 +1,172 @@
+@using VendorX.Models
+@using VendorX.Models.Enums
+@model Order
+
+@{
+    ViewData["Title"] = "Order Details";
+}
+
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+            <h3 class="mb-0"><i class="bi bi-bag-check"></i> Order Details</h3>
+            <a asp-action="Index" class="btn btn-light btn-sm">
+                <i class="bi bi-arrow-left"></i> Back to Orders
+            </a>
+        </div>
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h5>Order Information</h5>
+                    <dl class="row">
+                        <dt class="col-sm-4">Order Number:</dt>
+                        <dd class="col-sm-8"><strong>@Model.OrderNumber</strong></dd>
+
+                        <dt class="col-sm-4">Order Date:</dt>
+                        <dd class="col-sm-8">@Model.OrderDate.ToString("MMMM dd, yyyy HH:mm")</dd>
+
+                        <dt class="col-sm-4">Delivery Date:</dt>
+                        <dd class="col-sm-8">@(Model.DeliveryDate?.ToString("MMMM dd, yyyy") ?? "Not specified")</dd>
+
+                        <dt class="col-sm-4">Status:</dt>
+                        <dd class="col-sm-8">
+                            @switch (Model.Status)
+                            {
+                                case OrderStatus.Pending:
+                                    <span class="badge bg-warning text-dark">Pending</span>
+                                    break;
+                                case OrderStatus.Delivered:
+                                    <span class="badge bg-success">Delivered</span>
+                                    break;
+                                case OrderStatus.Cancelled:
+                                    <span class="badge bg-danger">Cancelled</span>
+                                    break;
+                            }
+                        </dd>
+                    </dl>
+                </div>
+
+                <div class="col-md-6">
+                    <h5>Customer Information</h5>
+                    <dl class="row">
+                        <dt class="col-sm-4">Name:</dt>
+                        <dd class="col-sm-8">@Model.Customer?.FullName</dd>
+
+                        <dt class="col-sm-4">Phone:</dt>
+                        <dd class="col-sm-8">@Model.Customer?.PhoneNumber</dd>
+
+                        <dt class="col-sm-4">Email:</dt>
+                        <dd class="col-sm-8">@(Model.Customer?.Email ?? "N/A")</dd>
+                    </dl>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.Notes))
+            {
+                <div class="alert alert-info">
+                    <strong>Notes:</strong> @Model.Notes
+                </div>
+            }
+
+            @if (Model.Status == OrderStatus.Cancelled && !string.IsNullOrEmpty(Model.CancellationReason))
+            {
+                <div class="alert alert-danger">
+                    <strong>Cancellation Reason:</strong> @Model.CancellationReason
+                </div>
+            }
+
+            <!-- Order Items -->
+            <h5 class="mt-4">Order Items</h5>
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Product</th>
+                            <th>Quantity</th>
+                            <th>Unit Price</th>
+                            <th>Total Price</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.OrderItems != null && Model.OrderItems.Any())
+                        {
+                            foreach (var item in Model.OrderItems)
+                            {
+                                <tr>
+                                    <td>@item.Product?.ProductName</td>
+                                    <td>@item.Quantity</td>
+                                    <td>@item.UnitPrice</td>
+                                    <td>@item.TotalPrice</td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th colspan="3" class="text-end">Total Amount:</th>
+                            <th>@Model.TotalAmount</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <!-- Status Update Actions -->
+            @if (Model.Status != OrderStatus.Delivered && Model.Status != OrderStatus.Cancelled)
+            {
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5>Update Order Status</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-2">
+                            @if (Model.Status == OrderStatus.Pending)
+                            {
+                                <div class="col-md-6">
+                                    <form asp-action="UpdateStatus" asp-route-id="@Model.OrderId" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="status" value="@((int)OrderStatus.Delivered)" />
+                                        <button type="submit" class="btn btn-success w-100">
+                                            <i class="bi bi-check-circle"></i> Mark as Delivered
+                                        </button>
+                                    </form>
+                                </div>
+                            }
+
+                            <div class="col-md-6">
+                                <button type="button" class="btn btn-danger w-100" data-bs-toggle="modal" data-bs-target="#cancelModal">
+                                    <i class="bi bi-x-circle"></i> Cancel Order
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Cancel Modal -->
+<div class="modal fade" id="cancelModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="UpdateStatus" asp-route-id="@Model.OrderId" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="status" value="@((int)OrderStatus.Cancelled)" />
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">Cancel Order</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Cancellation Reason</label>
+                        <textarea name="reason" class="form-control" rows="3" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-danger">Cancel Order</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

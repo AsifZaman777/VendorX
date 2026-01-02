@@ -1,0 +1,67 @@
+@using VendorX.Models
+@model List<BakiInvoice>
+
+@{
+    ViewData["Title"] = "Baki Invoices & Alerts";
+}
+
+<div class="container-fluid mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-info text-white">
+            <h3 class="mb-0"><i class="bi bi-bell"></i> Baki Invoices & Payment Alerts</h3>
+        </div>
+        <div class="card-body">
+            @if (Model == null || !Model.Any())
+            {
+                <div class="alert alert-success text-center">
+                    <i class="bi bi-check-circle"></i> No pending invoices. You're all caught up!
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Invoice #</th>
+                                <th>Shop</th>
+                                <th>Month/Year</th>
+                                <th>Total Amount</th>
+                                <th>Invoice Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var invoice in Model)
+                            {
+                                <tr>
+                                    <td><strong>@invoice.InvoiceNumber</strong></td>
+                                    <td>@invoice.Shop?.ShopName</td>
+                                    <td>@invoice.Month/@invoice.Year</td>
+                                    <td><span class="badge bg-danger fs-6">${invoice.TotalAmount:F2}</span></td>
+                                    <td>@invoice.InvoiceDate.ToString("MMM dd, yyyy")</td>
+                                    <td>
+                                        @if (invoice.IsSent)
+                                        {
+                                            <span class="badge bg-success">Sent</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning text-dark">Pending</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <a asp-action="InvoiceDetails" asp-route-id="@invoice.BakiInvoiceId" class="btn btn-sm btn-info">
+                                            <i class="bi bi-eye"></i> View Details
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>

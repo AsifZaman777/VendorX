@@ -1,0 +1,148 @@
+@using VendorX.Models
+@model List<Product>
+
+@{
+    ViewData["Title"] = "Products";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0 text-gray-800">
+        <i class="bi bi-box-seam"></i> Products Management
+    </h1>
+    <a asp-action="Create" class="btn btn-success">
+        <i class="bi bi-plus-circle"></i> Add New Product
+    </a>
+</div>
+
+<div class="card shadow">
+    <div class="card-header">
+        <i class="bi bi-grid"></i> All Products
+    </div>
+    <div class="card-body">
+        @if (Model == null || !Model.Any())
+        {
+            <div class="alert alert-info text-center">
+                <i class="bi bi-info-circle"></i> No products found. Add your first product to start selling.
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table id="productsTable" class="table table-hover table-striped">
+                    <thead>
+                        <tr>
+                            <th>Product Name</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                            <th>Stock</th>
+                            <th>Status</th>
+                            <th width="150">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var product in Model)
+                        {
+                            var stockClass = product.StockQuantity <= 10 ? "bg-danger" : (product.StockQuantity <= 50 ? "bg-warning text-dark" : "bg-success");
+                            <tr>
+                                <td>
+                                    <div>
+                                        <strong>@product.ProductName</strong>
+                                        @if (!string.IsNullOrEmpty(product.Description))
+                                        {
+                                            <br /><small class="text-muted">@product.Description</small>
+                                        }
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary">@product.Category?.CategoryName</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-primary fs-6">@(product.Price)</span>
+                                </td>
+                                <td>
+                                    <span class="badge @stockClass fs-6">@product.StockQuantity</span>
+                                </td>
+                                <td>
+                                    @if (product.IsActive)
+                                    {
+                                        <span class="badge bg-success">Active</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Inactive</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <a asp-action="Edit" asp-route-id="@product.ProductId" class="btn btn-warning">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        @if (product.IsActive)
+                                        {
+                                            <button type="button" class="btn btn-danger" onclick="deleteProduct(@product.ProductId, '@product.ProductName')">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Initialize DataTable with custom settings
+            $('#productsTable').DataTable({
+                order: [[0, 'asc']],
+                columnDefs: [
+                    { orderable: false, targets: [5] }
+                ],
+                pageLength: 25
+            });
+        });
+
+        // Delete Product Function
+        function deleteProduct(id, name) {
+            Swal.fire({
+                title: 'Delete Product?',
+                html: `Are you sure you want to delete <strong>"${name}"</strong>?<br><br><small class="text-muted">This will deactivate the product.</small>`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    showLoading();
+                    
+                    // Create form and submit
+                    var form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '@Url.Action("Delete", "Products")';
+                    
+                    var idInput = document.createElement('input');
+                    idInput.type = 'hidden';
+                    idInput.name = 'id';
+                    idInput.value = id;
+                    form.appendChild(idInput);
+                    
+                    var tokenInput = document.createElement('input');
+                    tokenInput.type = 'hidden';
+                    tokenInput.name = '__RequestVerificationToken';
+                    tokenInput.value = $('input[name="__RequestVerificationToken"]').val();
+                    form.appendChild(tokenInput);
+                    
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            });
+        }
+    </script>
+}
