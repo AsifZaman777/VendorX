@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using VendorX.Models;
 using VendorX.Services;
 using VendorX.ViewModels;
@@ -13,11 +14,16 @@ namespace VendorX.Areas.ShopKeeper.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IShopService _shopService;
+        private readonly IConfiguration _configuration;
 
-        public ShopController(UserManager<ApplicationUser> userManager, IShopService shopService)
+        public ShopController(
+            UserManager<ApplicationUser> userManager, 
+            IShopService shopService,
+            IConfiguration configuration)
         {
             _userManager = userManager;
             _shopService = shopService;
+            _configuration = configuration;
         }
 
         // GET: ShopKeeper/Shop/Create
@@ -55,7 +61,11 @@ namespace VendorX.Areas.ShopKeeper.Controllers
                 return RedirectToAction(nameof(Edit));
             }
 
-            await _shopService.CreateShopAsync(model, user!.Id);
+            // Get base URL from configuration or request
+            var baseUrl = _configuration["ApplicationSettings:BaseUrl"] 
+                ?? $"{Request.Scheme}://{Request.Host}";
+            
+            await _shopService.CreateShopAsync(model, user!.Id, baseUrl);
             TempData["Success"] = "Shop created successfully!";
             return RedirectToAction("Index", "Home");
         }
@@ -147,6 +157,38 @@ namespace VendorX.Areas.ShopKeeper.Controllers
             };
 
             return View(model);
+        }
+
+        // POST: ShopKeeper/Shop/RegenerateQRCode
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RegenerateQRCode()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            var shop = await _shopService.GetShopByUserIdAsync(user!.Id);
+            
+            if (shop == null)
+            {
+                TempData["Error"] = "Shop not found.";
+                return RedirectToAction("Index", "Home");
+            }
+
+            // Get base URL from configuration or request
+            var baseUrl = _configuration["ApplicationSettings:BaseUrl"] 
+                ?? $"{Request.Scheme}://{Request.Host}";
+            
+            var result = await _shopService.RegenerateQRCodeAsync(shop.ShopId, baseUrl);
+            
+            if (result)
+            {
+                TempData["Success"] = "QR Code regenerated successfully with updated URL!";
+            }
+            else
+            {
+                TempData["Error"] = "Failed to regenerate QR Code.";
+            }
+
+            return RedirectToAction("Index", "Home");
         }
     }
 }

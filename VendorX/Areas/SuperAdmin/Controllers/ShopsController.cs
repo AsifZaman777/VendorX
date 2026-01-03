@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using VendorX.Services;
 using VendorX.ViewModels;
 
@@ -10,10 +11,12 @@ namespace VendorX.Areas.SuperAdmin.Controllers
     public class ShopsController : Controller
     {
         private readonly IShopService _shopService;
+        private readonly IConfiguration _configuration;
 
-        public ShopsController(IShopService shopService)
+        public ShopsController(IShopService shopService, IConfiguration configuration)
         {
             _shopService = shopService;
+            _configuration = configuration;
         }
 
         public async Task<IActionResult> Index()
@@ -33,7 +36,11 @@ namespace VendorX.Areas.SuperAdmin.Controllers
         {
             if (ModelState.IsValid)
             {
-                await _shopService.CreateShopAsync(model, null);
+                // Get base URL from configuration or request
+                var baseUrl = _configuration["ApplicationSettings:BaseUrl"] 
+                    ?? $"{Request.Scheme}://{Request.Host}";
+                
+                await _shopService.CreateShopAsync(model, null, baseUrl);
                 TempData["Success"] = "Shop created successfully!";
                 return RedirectToAction(nameof(Index));
             }

@@ -8,9 +8,31 @@
         <div class="card shadow">
             <div class="card-body">
                 <h2 class="text-center mb-4">
-                    <i class="fas fa-user-plus"></i> Register
+                    <i class="fas fa-user-plus"></i> ShopKeeper Registration
                 </h2>
+
+                <!-- Customer Registration Notice -->
+                <div class="alert alert-info">
+                    <h5 class="alert-heading">
+                        <i class="bi bi-info-circle"></i> Are you a Customer?
+                    </h5>
+                    <p class="mb-2">
+                        Customers should register by scanning the shop's QR code. This will:
+                    </p>
+                    <ul class="mb-2">
+                        <li>Automatically link you to the shop</li>
+                        <li>Set up your account instantly</li>
+                        <li>Start tracking your purchases immediately</li>
+                    </ul>
+                    <p class="mb-0">
+                        <strong>Ask your shop for their QR code to register as a customer.</strong>
+                    </p>
+                </div>
+
+                <hr />
+
                 <form asp-action="Register" method="post">
+                    <input type="hidden" asp-for="Role" value="ShopKeeper" />
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                     
                     <div class="mb-3">
@@ -58,21 +80,9 @@
                         <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
                     </div>
 
-                    <div class="mb-3">
-                        <label asp-for="Role" class="form-label"></label>
-                        <select asp-for="Role" class="form-select">
-                            <option value="Customer">Customer</option>
-                            <option value="ShopKeeper">ShopKeeper</option>
-                        </select>
-                        <span asp-validation-for="Role" class="text-danger"></span>
-                        <small class="form-text text-muted">
-                            <i class="fas fa-info-circle"></i> Choose Customer to shop from multiple stores, or ShopKeeper to manage your own shop.
-                        </small>
-                    </div>
-
                     <div class="d-grid gap-2">
                         <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-user-plus"></i> Register
+                            <i class="fas fa-store"></i> Register as ShopKeeper
                         </button>
                     </div>
                 </form>

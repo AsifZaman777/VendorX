@@ -209,13 +209,13 @@
                         </a>
                     </div>
                     <div class="col-md-3">
-                        <a href="@Url.Action("CreateInvoice", "Baki")" class="btn btn-outline-secondary w-100">
-                            <i class="bi bi-file-earmark-text"></i> Invoice
+                        <a href="@Url.Action("Index", "Orders")" class="btn btn-outline-secondary w-100">
+                            <i class="bi bi-file-earmark-text"></i> Orders
                         </a>
                     </div>
                     <div class="col-md-3">
-                        <a href="@Url.Action("Index", "Reports")" class="btn btn-outline-secondary w-100">
-                            <i class="bi bi-graph-up"></i> Reports
+                        <a href="@Url.Action("Index", "Baki")" class="btn btn-outline-secondary w-100">
+                            <i class="bi bi-graph-up"></i> Baki
                         </a>
                     </div>
                 </div>
@@ -356,6 +356,12 @@
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                     <i class="bi bi-x-circle"></i> Close
                 </button>
+                <form asp-area="ShopKeeper" asp-controller="Shop" asp-action="RegenerateQRCode" method="post" style="display: inline;">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-warning" title="Regenerate QR Code with current server URL">
+                        <i class="bi bi-arrow-clockwise"></i> Regenerate QR
+                    </button>
+                </form>
                 <button type="button" class="btn btn-primary" onclick="printQRCode()">
                     <i class="bi bi-printer"></i> Print
                 </button>

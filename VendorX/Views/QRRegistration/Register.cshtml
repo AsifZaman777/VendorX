@@ -1,0 +1,131 @@
+@using VendorX.ViewModels
+@model QRCustomerRegistrationViewModel
+
+@{
+    ViewData["Title"] = "Register to Shop";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white text-center">
+                    <h3 class="mb-0">
+                        <i class="bi bi-qr-code"></i> Register to Shop
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <!-- Shop Information -->
+                    <div class="alert alert-info">
+                        <h5 class="alert-heading">
+                            <i class="bi bi-shop"></i> You're registering to:
+                        </h5>
+                        <h4 class="text-primary mb-2">@Model.ShopName</h4>
+                        @if (!string.IsNullOrEmpty(Model.ShopAddress))
+                        {
+                            <p class="mb-1">
+                                <i class="bi bi-geo-alt"></i> <strong>Address:</strong> @Model.ShopAddress
+                            </p>
+                        }
+                        @if (!string.IsNullOrEmpty(Model.ShopPhone))
+                        {
+                            <p class="mb-0">
+                                <i class="bi bi-telephone"></i> <strong>Phone:</strong> @Model.ShopPhone
+                            </p>
+                        }
+                    </div>
+
+                    <hr />
+
+                    <form asp-action="Register" method="post">
+                        <input type="hidden" asp-for="ShopId" />
+                        <input type="hidden" asp-for="ShopCode" />
+
+                        <div asp-validation-summary="All" class="text-danger"></div>
+
+                        <h5 class="mb-3">
+                            <i class="bi bi-person-plus"></i> Your Information
+                        </h5>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="FullName" class="form-label"></label>
+                                <input asp-for="FullName" class="form-control" placeholder="Enter your full name" />
+                                <span asp-validation-for="FullName" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="PhoneNumber" class="form-label"></label>
+                                <input asp-for="PhoneNumber" class="form-control" placeholder="01XXXXXXXXX" />
+                                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label"></label>
+                            <input asp-for="Email" class="form-control" placeholder="your.email@example.com" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Address" class="form-label"></label>
+                            <textarea asp-for="Address" class="form-control" rows="2" placeholder="Your address (optional)"></textarea>
+                            <span asp-validation-for="Address" class="text-danger"></span>
+                        </div>
+
+                        <hr />
+
+                        <h5 class="mb-3">
+                            <i class="bi bi-key"></i> Create Password
+                        </h5>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Password" class="form-label"></label>
+                                <input asp-for="Password" class="form-control" placeholder="At least 6 characters" />
+                                <span asp-validation-for="Password" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="ConfirmPassword" class="form-label"></label>
+                                <input asp-for="ConfirmPassword" class="form-control" placeholder="Confirm your password" />
+                                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-check-circle"></i> Complete Registration
+                            </button>
+                            <a href="@Url.Action("Index", "Home")" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-circle"></i> Cancel
+                            </a>
+                        </div>
+
+                        <div class="text-center mt-3">
+                            <small class="text-muted">
+                                Already have an account? 
+                                <a href="@Url.Action("Login", "Account")">Login here</a>
+                            </small>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="alert alert-success mt-3">
+                <i class="bi bi-info-circle"></i> 
+                <strong>What happens next?</strong>
+                <ul class="mb-0 mt-2">
+                    <li>Your account will be created automatically</li>
+                    <li>You'll be linked to <strong>@Model.ShopName</strong></li>
+                    <li>You can start tracking your purchases and Baki immediately</li>
+                    <li>Receive notifications via email and WhatsApp</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

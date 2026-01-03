@@ -10,9 +10,10 @@ namespace VendorX.Services
         Task<List<ShopViewModel>> GetAllShopsAsync();
         Task<ShopViewModel?> GetShopByIdAsync(int shopId);
         Task<Shop?> GetShopByUserIdAsync(string userId);
-        Task<int> CreateShopAsync(ShopViewModel model, string userId);
+        Task<int> CreateShopAsync(ShopViewModel model, string userId, string baseUrl);
         Task<bool> UpdateShopAsync(ShopViewModel model);
         Task<bool> DeleteShopAsync(int shopId);
+        Task<bool> RegenerateQRCodeAsync(int shopId, string baseUrl);
     }
 
     public class ShopService : IShopService
@@ -66,10 +67,12 @@ namespace VendorX.Services
             return await _context.Shops.FirstOrDefaultAsync(s => s.UserId == userId);
         }
 
-        public async Task<int> CreateShopAsync(ShopViewModel model, string userId)
+        public async Task<int> CreateShopAsync(ShopViewModel model, string userId, string baseUrl)
         {
             var shopCode = Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper();
-            var qrContent = $"SHOP:{shopCode}";
+            
+            // Generate QR code with registration URL using provided base URL
+            var qrContent = $"{baseUrl}/QRRegistration/Register?shopCode={shopCode}";
             var qrCode = _qrCodeService.GenerateQRCode(qrContent);
 
             var shop = new Shop
@@ -111,6 +114,20 @@ namespace VendorX.Services
             if (shop == null) return false;
 
             shop.IsActive = false;
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> RegenerateQRCodeAsync(int shopId, string baseUrl)
+        {
+            var shop = await _context.Shops.FindAsync(shopId);
+            if (shop == null) return false;
+
+            // Generate new QR code with updated URL
+            var qrContent = $"{baseUrl}/QRRegistration/Register?shopCode={shop.ShopCode}";
+            var qrCode = _qrCodeService.GenerateQRCode(qrContent);
+
+            shop.QRCode = qrCode;
             await _context.SaveChangesAsync();
             return true;
         }
