@@ -144,6 +144,10 @@ namespace VendorX.Areas.ShopKeeper.Controllers
             // If it's a credit transaction, create Baki record
             if (model.IsCredit && model.AmountDue > 0)
             {
+                // Build item-wise description for Baki record
+                var itemsDescription = string.Join(", ", model.Items.Select(item => 
+                    $"{item.ProductName} Qty:{item.Quantity} ${item.TotalPrice:F2}"));
+
                 // Create a new Baki record for each credit transaction
                 // This allows tracking by date and linking to specific POS transactions
                 var baki = new Baki
@@ -152,7 +156,7 @@ namespace VendorX.Areas.ShopKeeper.Controllers
                     ShopId = shop.ShopId,
                     Amount = model.AmountDue,
                     Status = BakiStatus.Due,
-                    Description = $"POS Transaction - {transaction.TransactionNumber}: ${model.AmountDue:F2}",
+                    Description = itemsDescription,
                     TransactionType = TransactionType.Purchase,
                     POSTransactionId = transaction.POSTransactionId,
                     CreatedAt = transactionDateTime

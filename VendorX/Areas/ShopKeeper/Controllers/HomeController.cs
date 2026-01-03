@@ -127,6 +127,9 @@ namespace VendorX.Areas.ShopKeeper.Controllers
             ViewBag.TotalBaki = totalBaki.ToString("C");
             ViewBag.TotalCustomers = totalCustomers;
             
+            // Shop Details for QR Code
+            ViewBag.Shop = shop;
+            
             // Chart Data
             ViewBag.ChartLabels = System.Text.Json.JsonSerializer.Serialize(chartLabels);
             ViewBag.ChartData = System.Text.Json.JsonSerializer.Serialize(chartData);
