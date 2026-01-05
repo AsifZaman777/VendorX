@@ -61,6 +61,9 @@ namespace VendorX.ViewModels
         public string? ShopAddress { get; set; }
         public string? ShopPhone { get; set; }
 
+        // Flag to indicate if this is an existing logged-in customer
+        public bool IsExistingCustomer { get; set; }
+
         // Customer Information
         [Required]
         [StringLength(200)]

@@ -47,6 +47,50 @@ namespace VendorX.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
+            // Check if user is already logged in
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                
+                if (currentUser != null && User.IsInRole("Customer"))
+                {
+                    // Get customer record
+                    var customer = await _context.Customers
+                        .FirstOrDefaultAsync(c => c.UserId == currentUser.Id);
+
+                    if (customer != null)
+                    {
+                        // Check if already registered to this shop
+                        var alreadyRegistered = await _context.ShopCustomers
+                            .AnyAsync(sc => sc.ShopId == shop.ShopId && sc.CustomerId == customer.CustomerId);
+
+                        if (alreadyRegistered)
+                        {
+                            TempData["Info"] = $"You are already registered to {shop.ShopName}. Redirecting to dashboard...";
+                            return RedirectToAction("Index", "Home", new { area = "Customer" });
+                        }
+                        else
+                        {
+                            // Show confirmation page for linking
+                            var linkModel = new QRCustomerRegistrationViewModel
+                            {
+                                ShopId = shop.ShopId,
+                                ShopCode = shopCode,
+                                ShopName = shop.ShopName,
+                                ShopAddress = shop.Address,
+                                ShopPhone = shop.PhoneNumber,
+                                FullName = customer.FullName,
+                                Email = customer.Email,
+                                PhoneNumber = customer.PhoneNumber,
+                                Address = customer.Address,
+                                IsExistingCustomer = true
+                            };
+                            return View("LinkShop", linkModel);
+                        }
+                    }
+                }
+            }
+
             var model = new QRCustomerRegistrationViewModel
             {
                 ShopId = shop.ShopId,
@@ -109,8 +153,8 @@ namespace VendorX.Controllers
                             TempData["Info"] = "You are already registered to this shop.";
                         }
 
-                        // Sign in the user
-                        await _signInManager.SignInAsync(existingUser, isPersistent: false);
+                        // Sign in the user with persistent cookie (7 days)
+                        await _signInManager.SignInAsync(existingUser, isPersistent: true);
                         return RedirectToAction("Index", "Home", new { area = "Customer" });
                     }
                 }
@@ -158,8 +202,8 @@ namespace VendorX.Controllers
                     _context.ShopCustomers.Add(shopCustomer);
                     await _context.SaveChangesAsync();
 
-                    // Sign in the user
-                    await _signInManager.SignInAsync(user, isPersistent: false);
+                    // Sign in the user with persistent cookie (7 days)
+                    await _signInManager.SignInAsync(user, isPersistent: true);
 
                     TempData["Success"] = $"Successfully registered to {shop.ShopName}! Welcome!";
                     return RedirectToAction("Index", "Home", new { area = "Customer" });
@@ -183,6 +227,67 @@ namespace VendorX.Controllers
             }
 
             return View(model);
+        }
+
+        // POST: /QRRegistration/LinkShop
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> LinkShop(int shopId)
+        {
+            if (!User.Identity?.IsAuthenticated == true)
+            {
+                TempData["Error"] = "You must be logged in to link to a shop.";
+                return RedirectToAction("Login", "Account");
+            }
+
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+            {
+                TempData["Error"] = "User not found.";
+                return RedirectToAction("Index", "Home");
+            }
+
+            var customer = await _context.Customers
+                .FirstOrDefaultAsync(c => c.UserId == currentUser.Id);
+
+            if (customer == null)
+            {
+                TempData["Error"] = "Customer record not found.";
+                return RedirectToAction("Index", "Home");
+            }
+
+            var shop = await _context.Shops
+                .FirstOrDefaultAsync(s => s.ShopId == shopId && s.IsActive);
+
+            if (shop == null)
+            {
+                TempData["Error"] = "Shop not found.";
+                return RedirectToAction("Index", "Home");
+            }
+
+            // Check if already linked
+            var existingLink = await _context.ShopCustomers
+                .FirstOrDefaultAsync(sc => sc.ShopId == shopId && sc.CustomerId == customer.CustomerId);
+
+            if (existingLink != null)
+            {
+                TempData["Info"] = $"You are already registered to {shop.ShopName}.";
+                return RedirectToAction("Index", "Home", new { area = "Customer" });
+            }
+
+            // Create link
+            var shopCustomer = new ShopCustomer
+            {
+                ShopId = shopId,
+                CustomerId = customer.CustomerId,
+                RegisteredAt = DateTime.UtcNow
+            };
+
+            _context.ShopCustomers.Add(shopCustomer);
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = $"Successfully registered to {shop.ShopName}!";
+            return RedirectToAction("Index", "Home", new { area = "Customer" });
         }
     }
 }

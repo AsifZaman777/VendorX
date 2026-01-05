@@ -39,7 +39,12 @@ namespace VendorX.Controllers
 
             if (ModelState.IsValid)
             {
-                var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
+                // Set isPersistent to true when RememberMe is checked, false otherwise
+                var result = await _signInManager.PasswordSignInAsync(
+                    model.Email, 
+                    model.Password, 
+                    isPersistent: model.RememberMe, // This will use the 7-day cookie if checked
+                    lockoutOnFailure: false);
                 
                 if (result.Succeeded)
                 {

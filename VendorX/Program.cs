@@ -32,8 +32,12 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.LoginPath = "/Account/Login";
     options.LogoutPath = "/Account/Logout";
     options.AccessDeniedPath = "/Account/AccessDenied";
-    options.ExpireTimeSpan = TimeSpan.FromHours(24);
-    options.SlidingExpiration = true;
+    options.ExpireTimeSpan = TimeSpan.FromDays(7); // Cookie expires after 7 days (1 week)
+    options.SlidingExpiration = true; // Refresh cookie expiration on each request
+    options.Cookie.HttpOnly = true; // Prevent client-side script access
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // Only send over HTTPS
+    options.Cookie.SameSite = SameSiteMode.Lax; // CSRF protection
+    options.Cookie.MaxAge = TimeSpan.FromDays(7); // Browser cookie lifetime
 });
 
 // Register application services
