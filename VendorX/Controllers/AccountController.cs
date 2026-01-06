@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using VendorX.Data;
 using VendorX.Models;
 using VendorX.Models.Enums;
 using VendorX.Services;
@@ -13,15 +15,18 @@ namespace VendorX.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly ICustomerService _customerService;
+        private readonly ApplicationDbContext _context;
 
         public AccountController(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
-            ICustomerService customerService)
+            ICustomerService customerService,
+            ApplicationDbContext context)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _customerService = customerService;
+            _context = context;
         }
 
         [HttpGet]
@@ -43,7 +48,7 @@ namespace VendorX.Controllers
                 var result = await _signInManager.PasswordSignInAsync(
                     model.Email, 
                     model.Password, 
-                    isPersistent: model.RememberMe, // This will use the 7-day cookie if checked
+                    isPersistent: model.RememberMe,
                     lockoutOnFailure: false);
                 
                 if (result.Succeeded)
@@ -52,14 +57,33 @@ namespace VendorX.Controllers
                     
                     if (user != null)
                     {
-                        // Redirect based on role
-                        if (user.Role == UserRole.SuperAdmin)
+                        // Check if user account is active
+                        if (!user.IsActive)
+                        {
+                            await _signInManager.SignOutAsync();
+                            ModelState.AddModelError(string.Empty, "Your account has been deactivated. Please contact support.");
+                            return View(model);
+                        }
+
+                        // For ShopKeepers, check if their shop is active
+                        if (user.Role == UserRole.ShopKeeper)
+                        {
+                            var shop = await _context.Shops
+                                .FirstOrDefaultAsync(s => s.UserId == user.Id);
+                            
+                            if (shop != null && !shop.IsActive)
+                            {
+                                await _signInManager.SignOutAsync();
+                                ModelState.AddModelError(string.Empty, 
+                                    "Your shop subscription is inactive. Please renew your subscription to continue. Contact admin for assistance.");
+                                return View(model);
+                            }
+                            
+                            return RedirectToAction("Index", "Home", new { area = "ShopKeeper" });
+                        }
+                        else if (user.Role == UserRole.SuperAdmin)
                         {
                             return RedirectToAction("Index", "Home", new { area = "SuperAdmin" });
-                        }
-                        else if (user.Role == UserRole.ShopKeeper)
-                        {
-                            return RedirectToAction("Index", "Home", new { area = "ShopKeeper" });
                         }
                         else if (user.Role == UserRole.Customer)
                         {

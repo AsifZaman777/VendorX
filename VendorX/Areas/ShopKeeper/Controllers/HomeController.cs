@@ -15,15 +15,18 @@ namespace VendorX.Areas.ShopKeeper.Controllers
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IShopService _shopService;
+        private readonly IAdminNoticeService _noticeService;
 
         public HomeController(
             ApplicationDbContext context,
             UserManager<ApplicationUser> userManager, 
-            IShopService shopService)
+            IShopService shopService,
+            IAdminNoticeService noticeService)
         {
             _context = context;
             _userManager = userManager;
             _shopService = shopService;
+            _noticeService = noticeService;
         }
 
         public async Task<IActionResult> Index()
@@ -36,6 +39,10 @@ namespace VendorX.Areas.ShopKeeper.Controllers
                 TempData["Warning"] = "Please complete your shop setup.";
                 return RedirectToAction("Create", "Shop");
             }
+
+            // Get active notices for ShopKeepers
+            var notices = await _noticeService.GetActiveNoticesForRoleAsync("ShopKeeper");
+            ViewBag.AdminNotices = notices;
 
             // Get today's date
             var today = DateTime.Today;

@@ -24,6 +24,7 @@ namespace VendorX.Models
         public DbSet<BakiInvoiceItem> BakiInvoiceItems { get; set; }
         public DbSet<Expense> Expenses { get; set; }
         public DbSet<Notification> Notifications { get; set; }
+        public DbSet<AdminNotice> AdminNotices { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

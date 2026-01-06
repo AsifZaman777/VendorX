@@ -48,6 +48,7 @@ builder.Services.AddScoped<IQRCodeService, QRCodeService>();
 builder.Services.AddScoped<IShopService, ShopService>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<IBakiService, BakiService>();
+builder.Services.AddScoped<IAdminNoticeService, AdminNoticeService>();
 
 var app = builder.Build();
 
