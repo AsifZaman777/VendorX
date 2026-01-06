@@ -113,10 +113,10 @@
                                         <a asp-action="Details" asp-route-id="@shop.ShopId" class="btn btn-info">
                                             <i class="bi bi-eye"></i>
                                         </a>
-                                        <button type="button" class="btn btn-warning" onclick="editShop(@shop.ShopId, '@Html.Raw(shop.ShopName)', '@Html.Raw(shop.Address?.Replace("\n", "\\n") ?? "")', '@shop.PhoneNumber', '@shop.Email', @shop.IsActive.ToString().ToLower())">
+                                        <button type="button" class="btn btn-warning" onclick="editShop(@shop.ShopId, '@Html.Raw(shop.ShopName.Replace("'", "\\'"))', '@Html.Raw((shop.Address ?? "").Replace("'", "\\'").Replace("\n", "\\n").Replace("\r", ""))', '@shop.PhoneNumber', '@shop.Email', '@shop.ShopCode', @shop.IsActive.ToString().ToLower())">
                                             <i class="bi bi-pencil"></i>
                                         </button>
-                                        <form asp-action="Delete" asp-route-id="@shop.ShopId" method="post" class="d-inline" onsubmit="return confirmDelete(event, '@shop.ShopName');">
+                                        <form asp-action="Delete" asp-route-id="@shop.ShopId" method="post" class="d-inline" onsubmit="return confirmDelete(event, '@Html.Raw(shop.ShopName.Replace("'", "\\'"))');">
                                             @Html.AntiForgeryToken()
                                             <button type="submit" class="btn btn-danger">
                                                 <i class="bi bi-trash"></i>
@@ -225,9 +225,9 @@
                         </div>
                     </div>
                     <div class="form-check mb-3">
-                        <input class="form-check-input" type="checkbox" id="editIsActive" name="IsActive" />
+                        <input class="form-check-input" type="checkbox" id="editIsActive" name="IsActive" value="true" />
                         <label class="form-check-label" for="editIsActive">
-                            Active
+                            Active (Enable/disable shop for operations)
                         </label>
                     </div>
                 </div>
@@ -251,20 +251,33 @@
                     { orderable: false, targets: [6] }
                 ]
             });
+
+            // Log form submission data
+            $('#editShopModal form').on('submit', function(e) {
+                var formData = $(this).serializeArray();
+                console.log('Form Data Being Submitted:', formData);
+                
+                var isActiveValues = formData.filter(function(item) {
+                    return item.name === 'IsActive';
+                });
+                console.log('IsActive values:', isActiveValues);
+            });
         });
 
-        function editShop(id, name, address, phone, email, isActive) {
-            // Get shop code from the table
-            var shopCode = $('tr').find(`button[onclick*="${id}"]`).closest('tr').find('.badge').text().trim();
+        function editShop(id, name, address, phone, email, shopCode, isActive) {
+            console.log('Edit Shop Called:', { id, name, address, phone, email, shopCode, isActive });
             
             $('#editShopId').val(id);
             $('#editShopCode').val(shopCode);
             $('#editShopCodeDisplay').val(shopCode);
             $('#editShopName').val(name);
             $('#editAddress').val(address);
-            $('#editPhoneNumber').val(phone);
-            $('#editEmail').val(email);
+            $('#editPhoneNumber').val(phone || '');
+            $('#editEmail').val(email || '');
             $('#editIsActive').prop('checked', isActive);
+            
+            console.log('IsActive checkbox set to:', isActive);
+            console.log('Checkbox is now:', $('#editIsActive').is(':checked'));
             
             var editModal = new bootstrap.Modal(document.getElementById('editShopModal'));
             editModal.show();
@@ -274,7 +287,7 @@
             event.preventDefault();
             Swal.fire({
                 title: 'Delete Shop?',
-                html: `Are you sure you want to delete <strong>"${shopName}"</strong>?<br><small class="text-muted">This action cannot be undone.</small>`,
+                html: 'Are you sure you want to delete <strong>"' + shopName + '"</strong>?<br><small class="text-muted">This action cannot be undone.</small>',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#d33',
