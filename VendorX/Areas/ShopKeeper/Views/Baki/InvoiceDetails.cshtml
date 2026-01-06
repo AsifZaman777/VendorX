@@ -1,4 +1,4 @@
-@using VendorX.Models
+﻿@using VendorX.Models
 @using VendorX.Services
 @inject VendorX.Services.IWhatsAppService WhatsAppService
 
@@ -7,11 +7,57 @@
 @{
     ViewData["Title"] = "Invoice Details";
     
-    // Generate WhatsApp message
-    var whatsappMessage = $"?? Invoice {Model.InvoiceNumber} from {Model.Shop?.ShopName}\n" +
-                         $"Period: {Model.Month}/{Model.Year}\n" +
-                         $"Total: ${Model.TotalAmount:N2}\n" +
-                         $"Check your email for details.";
+    // Generate detailed WhatsApp invoice message
+    var whatsappMessage = $@"*VendorX INVOICE of {new DateTime(Model.Year, Model.Month, 1):MMMM yyyy}*
+━━━━━━━━━━━━━━━━━━━━
+Invoice #: {Model.InvoiceNumber}
+Date: {Model.InvoiceDate:MMM dd, yyyy}
+Invoice period:{new DateTime(Model.Year, Model.Month, 1):MMMM yyyy}
+
+*FROM:*
+{Model.Shop?.ShopName ?? "VendorX"}
+{Model.Shop?.Address ?? ""}
+{Model.Shop?.PhoneNumber ?? ""}
+
+*TO:*
+{Model.Customer?.FullName ?? ""}
+{Model.Customer?.PhoneNumber ?? ""}
+
+━━━━━━━━━━━━━━━━━━━━
+*TRANSACTION DETAILS*
+━━━━━━━━━━━━━━━━━━━━";
+
+    // Add each transaction item
+    if (Model.BakiInvoiceItems != null && Model.BakiInvoiceItems.Any())
+    {
+        var itemNumber = 1;
+        foreach (var item in Model.BakiInvoiceItems.OrderBy(i => i.TransactionDate))
+        {
+            whatsappMessage += $@"
+{itemNumber}. 📅 {item.TransactionDate:MMM dd, yyyy}
+   {item.Description ?? "Transaction"}
+   ${item.Amount:N2}";
+            itemNumber++;
+        }
+    }
+
+    // Add totals
+    whatsappMessage += $@"
+━━━━━━━━━━━━━━━━━━━━
+*SUMMARY*
+━━━━━━━━━━━━━━━━━━━━
+Subtotal:     ${Model.TotalAmount:N2}
+Tax (0%):     $0.00
+━━━━━━━━━━━━━━━━━━━━
+*TOTAL DUE:   ${Model.TotalAmount:N2}*
+━━━━━━━━━━━━━━━━━━━━
+
+*Payment Instructions:*
+Please settle this invoice at your earliest convenience by visiting our shop or contacting us directly.
+
+Thank you for your business!
+
+Powered by VendorX";
     
     var whatsappLink = WhatsAppService.GenerateWhatsAppLink(Model.Customer?.PhoneNumber ?? "", whatsappMessage);
 }
