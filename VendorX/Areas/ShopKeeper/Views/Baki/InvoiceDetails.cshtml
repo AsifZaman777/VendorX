@@ -1,8 +1,19 @@
 @using VendorX.Models
+@using VendorX.Services
+@inject VendorX.Services.IWhatsAppService WhatsAppService
+
 @model BakiInvoice
 
 @{
     ViewData["Title"] = "Invoice Details";
+    
+    // Generate WhatsApp message
+    var whatsappMessage = $"?? Invoice {Model.InvoiceNumber} from {Model.Shop?.ShopName}\n" +
+                         $"Period: {Model.Month}/{Model.Year}\n" +
+                         $"Total: ${Model.TotalAmount:N2}\n" +
+                         $"Check your email for details.";
+    
+    var whatsappLink = WhatsAppService.GenerateWhatsAppLink(Model.Customer?.PhoneNumber ?? "", whatsappMessage);
 }
 
 <!-- Print/PDF Specific Styles -->
@@ -115,11 +126,17 @@
             <button onclick="downloadPDF()" class="btn btn-danger">
                 <i class="bi bi-file-pdf"></i> Download PDF
             </button>
+            @if (!string.IsNullOrEmpty(Model.Customer?.PhoneNumber))
+            {
+                <a href="@whatsappLink" target="_blank" class="btn btn-success">
+                    <i class="bi bi-whatsapp"></i> Send via WhatsApp
+                </a>
+            }
             @if (!Model.IsSent)
             {
                 <form asp-action="SendInvoice" asp-route-id="@Model.BakiInvoiceId" method="post" style="display: inline;">
                     @Html.AntiForgeryToken()
-                    <button type="submit" class="btn btn-success" onclick="return confirm('Send this invoice to customer?')">
+                    <button type="submit" class="btn btn-info" onclick="return confirm('Send this invoice to customer via email and WhatsApp?')">
                         <i class="bi bi-send"></i> Send Invoice
                     </button>
                 </form>

@@ -8,6 +8,7 @@ namespace VendorX.Services
     public interface IWhatsAppService
     {
         Task<bool> SendWhatsAppMessageAsync(string phoneNumber, string message);
+        string GenerateWhatsAppLink(string phoneNumber, string message);
     }
 
     public interface IQRCodeService
