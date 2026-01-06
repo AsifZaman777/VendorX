@@ -89,12 +89,51 @@ namespace VendorX.Areas.ShopKeeper.Controllers
                 salesByDay.FirstOrDefault(s => s.Date == d)?.Total ?? 0
             ).ToList();
 
+            // Baki Trend Data for Chart (Last 7 days)
+            var bakiByDay = await _context.BakiRecords
+                .Where(b => b.ShopId == shop.ShopId && b.CreatedAt.Date >= today.AddDays(-6))
+                .GroupBy(b => b.CreatedAt.Date)
+                .Select(g => new { Date = g.Key, Total = g.Sum(b => b.Amount) })
+                .ToListAsync();
+
+            var bakiChartData = last7Days.Select(d =>
+                bakiByDay.FirstOrDefault(b => b.Date == d)?.Total ?? 0
+            ).ToList();
+
+            // POS Sales Distribution (Cash vs Credit/Baki) - Last 30 days
+            var last30Days = today.AddDays(-30);
+            
+            var cashSales = await _context.POSTransactions
+                .Where(t => t.ShopId == shop.ShopId 
+                         && t.TransactionDate >= last30Days 
+                         && !t.IsCredit)
+                .SumAsync(t => (decimal?)t.AmountPaid) ?? 0;
+
+            var creditSales = await _context.POSTransactions
+                .Where(t => t.ShopId == shop.ShopId 
+                         && t.TransactionDate >= last30Days 
+                         && t.IsCredit)
+                .SumAsync(t => (decimal?)t.AmountPaid) ?? 0;
+
+            var bakiSales = await _context.POSTransactions
+                .Where(t => t.ShopId == shop.ShopId 
+                         && t.TransactionDate >= last30Days 
+                         && t.IsCredit)
+                .SumAsync(t => (decimal?)t.AmountDue) ?? 0;
+
+            var posPieData = new[]
+            {
+                new { name = "Cash Sales", y = cashSales },
+                new { name = "Credit (Paid)", y = creditSales },
+                new { name = "Baki (Due)", y = bakiSales }
+            };
+
             // Top Products (Last 30 days)
             var topProducts = await _context.POSTransactionItems
                 .Include(i => i.Product)
                 .Include(i => i.POSTransaction)
                 .Where(i => i.POSTransaction.ShopId == shop.ShopId 
-                         && i.POSTransaction.TransactionDate >= today.AddDays(-30))
+                         && i.POSTransaction.TransactionDate >= last30Days)
                 .GroupBy(i => new { i.ProductId, i.Product.ProductName })
                 .Select(g => new { 
                     ProductName = g.Key.ProductName, 
@@ -126,7 +165,7 @@ namespace VendorX.Areas.ShopKeeper.Controllers
                 .Take(5)
                 .Select(p => new { p.ProductName, p.StockQuantity })
                 .ToListAsync();
-
+            
             ViewBag.ShopName = shop.ShopName;
             ViewBag.TodaySales = todaySales.ToString("C");
             ViewBag.TodayTransactions = todayTransactions;
@@ -140,6 +179,9 @@ namespace VendorX.Areas.ShopKeeper.Controllers
             // Chart Data
             ViewBag.ChartLabels = System.Text.Json.JsonSerializer.Serialize(chartLabels);
             ViewBag.ChartData = System.Text.Json.JsonSerializer.Serialize(chartData);
+            ViewBag.BakiChartLabels = System.Text.Json.JsonSerializer.Serialize(chartLabels);
+            ViewBag.BakiChartData = System.Text.Json.JsonSerializer.Serialize(bakiChartData);
+            ViewBag.POSPieData = System.Text.Json.JsonSerializer.Serialize(posPieData);
             
             // Lists
             ViewBag.TopProducts = topProducts;

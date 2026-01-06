@@ -148,22 +148,126 @@
     </div>
 </div>
 
-<!-- Charts Row -->
 <div class="row mb-4">
-    <!-- Sales Trend Chart -->
-    <div class="col-lg-8 mb-4">
-        <div class="card shadow">
-            <div class="card-header bg-primary text-white">
-                <i class="bi bi-graph-up"></i> Sales Trend (Last 7 Days)
+    <!-- Sales & Baki Trend Chart with Tabs -->
+    <div class="col-lg-8">
+        <div class="card shadow h-100">
+            <div class="card-header bg-primary text-white py-2">
+                <ul class="nav nav-tabs card-header-tabs" id="trendChartTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active text-white py-1 px-2 small"
+                                id="sales-tab"
+                                data-bs-toggle="tab"
+                                data-bs-target="#salesTrend"
+                                type="button"
+                                role="tab">
+                            <i class="bi bi-graph-up"></i> Sales Trend (7 days)
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link text-white py-1 px-2 small"
+                                id="baki-tab"
+                                data-bs-toggle="tab"
+                                data-bs-target="#bakiTrend"
+                                type="button"
+                                role="tab">
+                            <i class="bi bi-graph-up-arrow"></i> Baki Trend (7 Days)
+                        </button>
+                    </li>
+                </ul>
             </div>
-            <div class="card-body">
-                <div id="salesChart" style="height: 300px;"></div>
+
+            <div class="card-body p-2 d-flex align-items-center">
+                <div class="tab-content flex-fill" id="trendChartContent" style="height: 300px;">
+                    <div class="tab-pane fade show active h-100" id="salesTrend" role="tabpanel">
+                        <div id="salesChart" class="h-100"></div>
+                    </div>
+                    <div class="tab-pane fade h-100" id="bakiTrend" role="tabpanel">
+                        <div id="bakiChart" class="h-100"></div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- POS Sales Distribution Pie Chart -->
+    <div class="col-lg-4">
+        <div class="card shadow h-100">
+            <div class="card-header bg-success text-white py-3">
+                <i class="bi bi-pie-chart"></i> POS Sales Distribution
+            </div>
+
+            <div class="card-body p-2 d-flex align-items-center" style="height: 300px;">
+                <div id="posPieChart" class="flex-fill h-100"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Quick Actions -->
+<div class="col-lg-12 mb-4">
+    <div class="card shadow">
+        <div class="card-header">
+            <i class="bi bi-lightning-charge"></i> Quick Actions
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <a href="@Url.Action("Index", "POS")" class="btn btn-primary w-100 btn-lg">
+                        <i class="bi bi-cart-check d-block fs-2 mb-2"></i>
+                        @* <strong>POS System</strong> *@
+                        <small class="d-block">Process Sale</small>
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="@Url.Action("Create", "Orders")" class="btn btn-success w-100 btn-lg">
+                        <i class="bi bi-plus-circle d-block fs-2 mb-2"></i>
+                        @* <strong>New Order</strong> *@
+                        <small class="d-block">Create Order</small>
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="@Url.Action("Index", "Products")" class="btn btn-info w-100 btn-lg">
+                        <i class="bi bi-box-seam d-block fs-2 mb-2"></i>
+                        @* <strong>Products</strong> *@
+                        <small class="d-block">Manage Stock</small>
+                    </a>
+                </div>
+            </div>
+
+            <hr class="my-3" />
+
+            <div class="row g-2">
+                <div class="col-md-3">
+                    <a href="@Url.Action("Index", "Categories")" class="btn btn-outline-secondary w-100">
+                        <i class="bi bi-tags"></i> Categories
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="@Url.Action("Index", "Customers")" class="btn btn-outline-secondary w-100">
+                        <i class="bi bi-people"></i> Customers
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="@Url.Action("Index", "Orders")" class="btn btn-outline-secondary w-100">
+                        <i class="bi bi-file-earmark-text"></i> Orders
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="@Url.Action("Index", "Baki")" class="btn btn-outline-secondary w-100">
+                        <i class="bi bi-graph-up"></i> Baki
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="row mb-4">
     <!-- Top Products -->
-    <div class="col-lg-4 mb-4">
+    <div class="col-lg-6 mb-4">
         <div class="card shadow h-100">
             <div class="card-header bg-success text-white">
                 <i class="bi bi-star"></i> Top Products (30 Days)
@@ -190,67 +294,6 @@
                 {
                     <p class="text-muted text-center mb-0">No sales data available</p>
                 }
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="row mb-4">
-    <!-- Quick Actions -->
-    <div class="col-lg-6 mb-4">
-        <div class="card shadow">
-            <div class="card-header">
-                <i class="bi bi-lightning-charge"></i> Quick Actions
-            </div>
-            <div class="card-body">
-                <div class="row g-3">
-                    <div class="col-md-4">
-                        <a href="@Url.Action("Index", "POS")" class="btn btn-primary w-100 btn-lg">
-                            <i class="bi bi-cart-check d-block fs-2 mb-2"></i>
-                            <strong>POS System</strong>
-                            <small class="d-block">Process Sale</small>
-                        </a>
-                    </div>
-                    <div class="col-md-4">
-                        <a href="@Url.Action("Create", "Orders")" class="btn btn-success w-100 btn-lg">
-                            <i class="bi bi-plus-circle d-block fs-2 mb-2"></i>
-                            <strong>New Order</strong>
-                            <small class="d-block">Create Order</small>
-                        </a>
-                    </div>
-                    <div class="col-md-4">
-                        <a href="@Url.Action("Index", "Products")" class="btn btn-info w-100 btn-lg">
-                            <i class="bi bi-box-seam d-block fs-2 mb-2"></i>
-                            <strong>Products</strong>
-                            <small class="d-block">Manage Inventory</small>
-                        </a>
-                    </div>
-                </div>
-                
-                <hr class="my-3" />
-                
-                <div class="row g-2">
-                    <div class="col-md-3">
-                        <a href="@Url.Action("Index", "Categories")" class="btn btn-outline-secondary w-100">
-                            <i class="bi bi-tags"></i> Categories
-                        </a>
-                    </div>
-                    <div class="col-md-3">
-                        <a href="@Url.Action("Index", "Customers")" class="btn btn-outline-secondary w-100">
-                            <i class="bi bi-people"></i> Customers
-                        </a>
-                    </div>
-                    <div class="col-md-3">
-                        <a href="@Url.Action("Index", "Orders")" class="btn btn-outline-secondary w-100">
-                            <i class="bi bi-file-earmark-text"></i> Orders
-                        </a>
-                    </div>
-                    <div class="col-md-3">
-                        <a href="@Url.Action("Index", "Baki")" class="btn btn-outline-secondary w-100">
-                            <i class="bi bi-graph-up"></i> Baki
-                        </a>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -407,60 +450,164 @@
 
 @section Scripts {
     <script>
-        // Sales Chart
-        Highcharts.chart('salesChart', {
-            chart: {
-                type: 'area'
-            },
-            title: {
-                text: null
-            },
-            xAxis: {
-                categories: @Html.Raw(ViewBag.ChartLabels)
-            },
-            yAxis: {
-                title: {
-                    text: 'Sales Amount ($)'
-                }
-            },
-            legend: {
-                enabled: false
-            },
-            plotOptions: {
-                area: {
-                    fillColor: {
-                        linearGradient: {
-                            x1: 0,
-                            y1: 0,
-                            x2: 0,
-                            y2: 1
-                        },
-                        stops: [
-                            [0, 'rgba(78, 115, 223, 0.5)'],
-                            [1, 'rgba(78, 115, 223, 0.05)']
-                        ]
-                    },
-                    marker: {
-                        radius: 4
-                    },
-                    lineWidth: 2,
-                    states: {
-                        hover: {
-                            lineWidth: 2
+        $(document).ready(function() {
+            // Initialize charts immediately
+            initializeCharts();
+            
+            // Re-render charts when tabs are switched
+            $('#trendChartTabs button').on('shown.bs.tab', function (e) {
+                var target = $(e.target).data('bs-target');
+                if (target === '#salesTrend') {
+                    Highcharts.charts.forEach(function(chart) {
+                        if (chart && chart.renderTo.id === 'salesChart') {
+                            chart.reflow();
                         }
-                    },
-                    threshold: null
+                    });
+                } else if (target === '#bakiTrend') {
+                    Highcharts.charts.forEach(function(chart) {
+                        if (chart && chart.renderTo.id === 'bakiChart') {
+                            chart.reflow();
+                        }
+                    });
                 }
-            },
-            series: [{
-                name: 'Sales',
-                data: @Html.Raw(ViewBag.ChartData),
-                color: '#4e73df'
-            }],
-            credits: {
-                enabled: false
-            }
+            });
         });
+
+        function initializeCharts() {
+            // Sales Chart
+            Highcharts.chart('salesChart', {
+                chart: {
+                    type: 'area'
+                },
+                title: {
+                    text: null
+                },
+                xAxis: {
+                    categories: @Html.Raw(ViewBag.ChartLabels)
+                },
+                yAxis: {
+                    title: {
+                        text: 'Sales Amount ($)'
+                    }
+                },
+                legend: {
+                    enabled: false
+                },
+                plotOptions: {
+                    area: {
+                        fillColor: {
+                            linearGradient: {
+                                x1: 0,
+                                y1: 0,
+                                x2: 0,
+                                y2: 1
+                            },
+                            stops: [
+                                [0, 'rgba(78, 115, 223, 0.5)'],
+                                [1, 'rgba(78, 115, 223, 0.05)']
+                            ]
+                        },
+                        marker: {
+                            radius: 4
+                        },
+                        lineWidth: 2,
+                        states: {
+                            hover: {
+                                lineWidth: 2
+                            }
+                        },
+                        threshold: null
+                    }
+                },
+                series: [{
+                    name: 'Sales',
+                    data: @Html.Raw(ViewBag.ChartData),
+                    color: '#4e73df'
+                }],
+                credits: {
+                    enabled: false
+                }
+            });
+
+            // Baki Trend Chart
+            Highcharts.chart('bakiChart', {
+                chart: {
+                    type: 'line'
+                },
+                title: {
+                    text: null
+                },
+                xAxis: {
+                    categories: @Html.Raw(ViewBag.BakiChartLabels ?? ViewBag.ChartLabels)
+                },
+                yAxis: {
+                    title: {
+                        text: 'Baki Amount (BDT)'
+                    }
+                },
+                legend: {
+                    enabled: false
+                },
+                plotOptions: {
+                    line: {
+                        marker: {
+                            radius: 5
+                        },
+                        lineWidth: 3,
+                        states: {
+                            hover: {
+                                lineWidth: 3
+                            }
+                        }
+                    }
+                },
+                series: [{
+                    name: 'Baki',
+                    data: @Html.Raw(ViewBag.BakiChartData ?? "[0,0,0,0,0,0,0]"),
+                    color: '#f05959'
+                }],
+                credits: {
+                    enabled: false
+                }
+            });
+
+            // POS Sales Distribution Pie Chart
+            Highcharts.chart('posPieChart', {
+                chart: {
+                    type: 'pie'
+                },
+                title: {
+                    text: null
+                },
+                tooltip: {
+                    pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b><br/>Amount: <b>${point.y}</b>'
+                },
+                accessibility: {
+                    point: {
+                        valueSuffix: '%'
+                    }
+                },
+                plotOptions: {
+                    pie: {
+                        allowPointSelect: true,
+                        cursor: 'pointer',
+                        dataLabels: {
+                            enabled: true,
+                            format: '<b>{point.name}</b>: {point.percentage:.1f} %'
+                        },
+                        showInLegend: true
+                    }
+                },
+                series: [{
+                    name: 'Sales',
+                    colorByPoint: true,
+                    data: @Html.Raw(ViewBag.POSPieData ?? "[{name: 'Cash', y: 0}, {name: 'Credit', y: 0}, {name: 'Baki', y: 0}]")
+                }],
+                credits: {
+                    enabled: false
+                }
+            });
+        }
 
         // Print QR Code
         function printQRCode() {
@@ -495,4 +642,21 @@
     .border-left-info { border-left: 4px solid #36b9cc !important; }
     .border-left-warning { border-left: 4px solid #f6c23e !important; }
     .border-left-danger { border-left: 4px solid #e74a3b !important; }
+    
+    /* Tab styling for chart card */
+    #trendChartTabs .nav-link {
+        border: none;
+        border-bottom: 3px solid transparent;
+        background: transparent;
+    }
+    
+    #trendChartTabs .nav-link:hover {
+        border-bottom-color: rgba(255, 255, 255, 0.5);
+    }
+    
+    #trendChartTabs .nav-link.active {
+        background: transparent;
+        border-bottom-color: white;
+        font-weight: bold;
+    }
 </style>
