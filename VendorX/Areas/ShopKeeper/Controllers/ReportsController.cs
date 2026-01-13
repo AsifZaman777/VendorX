@@ -90,8 +90,9 @@ namespace VendorX.Areas.ShopKeeper.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
-            var from = fromDate ?? DateTime.Today.AddMonths(-1);
-            var to = toDate ?? DateTime.Today;
+            // Default date range: last 3 months to end of today
+            var from = fromDate ?? DateTime.Today.AddMonths(-3);
+            var to = (toDate ?? DateTime.Today).AddDays(1).AddSeconds(-1); // Include entire day
 
             var bakiRecords = await _context.BakiRecords
                 .Where(b => b.ShopId == shop.ShopId && b.CreatedAt >= from && b.CreatedAt <= to)
@@ -99,20 +100,21 @@ namespace VendorX.Areas.ShopKeeper.Controllers
                 .ToListAsync();
 
             var customerBakis = bakiRecords
-                .GroupBy(b => new { b.CustomerId, b.Customer.FullName })
+                .GroupBy(b => new { b.CustomerId, CustomerName = b.Customer != null ? b.Customer.FullName : "Unknown Customer" })
                 .Select(g => new CustomerBakiSummary
                 {
-                    CustomerName = g.Key.FullName,
+                    CustomerName = g.Key.CustomerName,
                     DueAmount = g.Where(b => b.Status == BakiStatus.Due).Sum(b => b.Amount),
                     SettledAmount = g.Where(b => b.Status == BakiStatus.Settled).Sum(b => b.Amount),
                     TotalAmount = g.Sum(b => b.Amount)
                 })
+                .OrderByDescending(c => c.DueAmount)
                 .ToList();
 
             var model = new BakiReportViewModel
             {
-                FromDate = from,
-                ToDate = to,
+                FromDate = fromDate ?? DateTime.Today.AddMonths(-3),
+                ToDate = toDate ?? DateTime.Today,
                 TotalDue = customerBakis.Sum(c => c.DueAmount),
                 TotalSettled = customerBakis.Sum(c => c.SettledAmount),
                 CustomerBakis = customerBakis

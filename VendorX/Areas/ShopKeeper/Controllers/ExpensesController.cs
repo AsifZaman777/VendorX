@@ -454,6 +454,136 @@ namespace VendorX.Areas.ShopKeeper.Controllers
             });
         }
 
+        // POST: DeleteFixedExpense
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteFixedExpense(int id)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            var shop = await _shopService.GetShopByUserIdAsync(user!.Id);
+
+            if (shop == null)
+            {
+                return Json(new { success = false, message = "Shop not found" });
+            }
+
+            var fixedExpense = await _context.FixedExpenses
+                .FirstOrDefaultAsync(fe => fe.FixedExpenseId == id && fe.ShopId == shop.ShopId);
+
+            if (fixedExpense == null)
+            {
+                return Json(new { success = false, message = "Fixed expense not found" });
+            }
+
+            _context.FixedExpenses.Remove(fixedExpense);
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true, message = "Fixed expense deleted successfully!" });
+        }
+
+        // GET: GetFixedExpense
+        [HttpGet]
+        public async Task<IActionResult> GetFixedExpense(int id)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            var shop = await _shopService.GetShopByUserIdAsync(user!.Id);
+
+            if (shop == null)
+            {
+                return Json(new { success = false, message = "Shop not found" });
+            }
+
+            var fixedExpense = await _context.FixedExpenses
+                .Include(fe => fe.ExpenseCategory)
+                .FirstOrDefaultAsync(fe => fe.FixedExpenseId == id && fe.ShopId == shop.ShopId);
+
+            if (fixedExpense == null)
+            {
+                return Json(new { success = false, message = "Fixed expense not found" });
+            }
+
+            var model = new FixedExpenseViewModel
+            {
+                FixedExpenseId = fixedExpense.FixedExpenseId,
+                ShopId = fixedExpense.ShopId, // Include ShopId
+                ExpenseCategoryId = fixedExpense.ExpenseCategoryId,
+                ExpenseCategoryName = fixedExpense.ExpenseCategory.CategoryName,
+                ExpenseName = fixedExpense.ExpenseName,
+                Amount = fixedExpense.Amount,
+                Description = fixedExpense.Description,
+                RecurrenceType = fixedExpense.RecurrenceType,
+                RecurrenceInterval = fixedExpense.RecurrenceInterval,
+                DayOfMonth = fixedExpense.DayOfMonth,
+                DayOfWeek = fixedExpense.DayOfWeek,
+                StartDate = fixedExpense.StartDate,
+                EndDate = fixedExpense.EndDate,
+                PaymentMethod = fixedExpense.PaymentMethod,
+                Vendor = fixedExpense.Vendor,
+                Notes = fixedExpense.Notes,
+                IsActive = fixedExpense.IsActive
+            };
+
+            return Json(new { success = true, data = model });
+        }
+
+        // POST: EditFixedExpense
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditFixedExpense(FixedExpenseViewModel model)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            var shop = await _shopService.GetShopByUserIdAsync(user!.Id);
+
+            if (shop == null)
+            {
+                TempData["Error"] = "Shop not found";
+                return RedirectToAction(nameof(FixedExpenses));
+            }
+
+            var fixedExpense = await _context.FixedExpenses
+                .FirstOrDefaultAsync(fe => fe.FixedExpenseId == model.FixedExpenseId && fe.ShopId == shop.ShopId);
+
+            if (fixedExpense == null)
+            {
+                TempData["Error"] = "Fixed expense not found";
+                return RedirectToAction(nameof(FixedExpenses));
+            }
+
+            ModelState.Remove("ExpenseCategoryName");
+            ModelState.Remove("NextDueDate");
+
+            if (!ModelState.IsValid)
+            {
+                TempData["Error"] = "Please fill in all required fields";
+                return RedirectToAction(nameof(FixedExpenses));
+            }
+
+            // Update properties
+            fixedExpense.ExpenseCategoryId = model.ExpenseCategoryId;
+            fixedExpense.ExpenseName = model.ExpenseName;
+            fixedExpense.Amount = model.Amount;
+            fixedExpense.Description = model.Description;
+            fixedExpense.RecurrenceType = model.RecurrenceType;
+            fixedExpense.RecurrenceInterval = model.RecurrenceInterval;
+            fixedExpense.DayOfMonth = model.DayOfMonth;
+            fixedExpense.DayOfWeek = model.DayOfWeek;
+            fixedExpense.StartDate = model.StartDate;
+            fixedExpense.EndDate = model.EndDate;
+            fixedExpense.PaymentMethod = model.PaymentMethod;
+            fixedExpense.Vendor = model.Vendor;
+            fixedExpense.Notes = model.Notes;
+            fixedExpense.IsActive = model.IsActive;
+            fixedExpense.UpdatedAt = DateTime.Now;
+
+            // Recalculate next due date
+            fixedExpense.NextDueDate = CalculateNextDueDate(fixedExpense);
+
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Fixed expense updated successfully!";
+            return RedirectToAction(nameof(FixedExpenses));
+        }
+
         // Helper method to calculate next due date
         private DateTime CalculateNextDueDate(FixedExpense fixedExpense)
         {

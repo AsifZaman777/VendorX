@@ -87,13 +87,17 @@ else
                             }
                         </td>
                         <td class="text-center">
-                            <form asp-action="ToggleFixedExpense" asp-route-id="@expense.FixedExpenseId" method="post" style="display: inline;">
-                                @Html.AntiForgeryToken()
-                                <button type="submit" class="btn btn-sm btn-@(expense.IsActive ? "warning" : "success")" 
-                                        title="@(expense.IsActive ? "Pause" : "Activate")">
-                                    <i class="bi bi-@(expense.IsActive ? "pause" : "play")-circle"></i>
-                                </button>
-                            </form>
+                            <button type="button" class="btn btn-sm btn-@(expense.IsActive ? "warning" : "success")" 
+                                    onclick="toggleFixedExpense(@expense.FixedExpenseId, @(expense.IsActive ? "true" : "false"))"
+                                    title="@(expense.IsActive ? "Pause" : "Activate")">
+                                <i class="bi bi-@(expense.IsActive ? "pause" : "play")-circle"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-primary" onclick="editFixedExpense(@expense.FixedExpenseId)" title="Edit">
+                                <i class="bi bi-pencil-square"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-danger" onclick="deleteFixedExpense(@expense.FixedExpenseId)" title="Delete">
+                                <i class="bi bi-trash"></i>
+                            </button>
                         </td>
                     </tr>
                 }
@@ -206,6 +210,120 @@ else
     </div>
 </div>
 
+<!-- Edit Fixed Expense Modal -->
+<div class="modal fade" id="editFixedExpenseModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="bi bi-pencil-square"></i> Edit Fixed Expense</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="EditFixedExpense" method="post" id="editFixedExpenseForm">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="FixedExpenseId" id="editFixedExpenseId" />
+                <input type="hidden" name="ShopId" id="editShopId" />
+                
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Expense Name *</label>
+                            <input type="text" name="ExpenseName" id="editExpenseName" class="form-control" required />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Category *</label>
+                            <select name="ExpenseCategoryId" id="editExpenseCategoryId" class="form-select" required>
+                                <option value="">Select Category</option>
+                                @if (categories != null)
+                                {
+                                    @foreach (var cat in categories)
+                                    {
+                                        <option value="@cat.ExpenseCategoryId">@cat.CategoryName</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Amount (?) *</label>
+                            <input type="number" name="Amount" id="editAmount" class="form-control" step="0.01" min="0.01" required />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Recurrence Type *</label>
+                            <select name="RecurrenceType" class="form-select" id="editRecurrenceType" required>
+                                <option value="Daily">Daily</option>
+                                <option value="Weekly">Weekly</option>
+                                <option value="Monthly">Monthly</option>
+                                <option value="Yearly">Yearly</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Recurrence Interval</label>
+                            <input type="number" name="RecurrenceInterval" id="editRecurrenceInterval" class="form-control" value="1" min="1" />
+                            <small class="text-muted">Every X days/weeks/months/years</small>
+                        </div>
+                        <div class="col-md-6 mb-3" id="editDayOfMonthContainer" style="display:none;">
+                            <label class="form-label">Day of Month</label>
+                            <input type="number" name="DayOfMonth" id="editDayOfMonth" class="form-control" min="1" max="31" />
+                            <small class="text-muted">For monthly expenses</small>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea name="Description" id="editDescription" class="form-control" rows="2"></textarea>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Start Date *</label>
+                            <input type="date" name="StartDate" id="editStartDate" class="form-control" required />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">End Date (Optional)</label>
+                            <input type="date" name="EndDate" id="editEndDate" class="form-control" />
+                            <small class="text-muted">Leave empty for no end date</small>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Payment Method</label>
+                            <input type="text" name="PaymentMethod" id="editPaymentMethod" class="form-control" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Vendor</label>
+                            <input type="text" name="Vendor" id="editVendor" class="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Notes</label>
+                        <textarea name="Notes" id="editNotes" class="form-control" rows="2"></textarea>
+                    </div>
+
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="IsActive" id="editIsActive" value="true" />
+                        <label class="form-check-label" for="editIsActive">
+                            Active
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save"></i> Update Fixed Expense
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script>
         $('#recurrenceType').on('change', function() {
@@ -216,9 +334,217 @@ else
             }
         });
 
+        $('#editRecurrenceType').on('change', function() {
+            if ($(this).val() === 'Monthly') {
+                $('#editDayOfMonthContainer').show();
+            } else {
+                $('#editDayOfMonthContainer').hide();
+            }
+        });
+
         // Show/hide on page load
         if ($('#recurrenceType').val() === 'Monthly') {
             $('#dayOfMonthContainer').show();
+        }
+
+        function toggleFixedExpense(fixedExpenseId, isCurrentlyActive) {
+            const action = isCurrentlyActive ? 'pause' : 'activate';
+            const confirmText = isCurrentlyActive ? 
+                'This will pause automatic expense generation.' : 
+                'This will resume automatic expense generation.';
+            
+            Swal.fire({
+                title: `${action.charAt(0).toUpperCase() + action.slice(1)} Fixed Expense?`,
+                text: confirmText,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: isCurrentlyActive ? '#ffc107' : '#28a745',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: `Yes, ${action} it!`,
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '@Url.Action("ToggleFixedExpense")',
+                        type: 'POST',
+                        data: {
+                            id: fixedExpenseId,
+                            __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Success!',
+                                    text: response.message,
+                                    timer: 2000,
+                                    showConfirmButton: false
+                                }).then(() => {
+                                    location.reload();
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error!',
+                                    text: response.message || 'Failed to toggle fixed expense',
+                                    confirmButtonColor: '#dc3545'
+                                });
+                            }
+                        },
+                        error: function(xhr) {
+                            console.error('Error toggling fixed expense:', xhr.responseText);
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error!',
+                                text: 'An error occurred while toggling the fixed expense',
+                                confirmButtonColor: '#dc3545'
+                            });
+                        }
+                    });
+                }
+            });
+        }
+
+        function editFixedExpense(fixedExpenseId) {
+            // Show loading with SweetAlert
+            Swal.fire({
+                title: 'Loading...',
+                text: 'Please wait',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            $.ajax({
+                url: '@Url.Action("GetFixedExpense")',
+                type: 'GET',
+                data: { id: fixedExpenseId },
+                success: function(response) {
+                    Swal.close();
+                    
+                    if (response.success) {
+                        const data = response.data;
+                        
+                        // Populate form fields
+                        $('#editFixedExpenseId').val(data.FixedExpenseId || data.fixedExpenseId);
+                        $('#editShopId').val(data.ShopId || data.shopId); // Fix: Set ShopId
+                        $('#editExpenseName').val(data.ExpenseName || data.expenseName);
+                        $('#editExpenseCategoryId').val(data.ExpenseCategoryId || data.expenseCategoryId);
+                        $('#editAmount').val(data.Amount || data.amount);
+                        $('#editRecurrenceType').val(data.RecurrenceType || data.recurrenceType);
+                        $('#editRecurrenceInterval').val(data.RecurrenceInterval || data.recurrenceInterval || 1);
+                        $('#editDayOfMonth').val(data.DayOfMonth || data.dayOfMonth || '');
+                        $('#editDescription').val(data.Description || data.description || '');
+                        
+                        // Format dates for input
+                        const startDate = data.StartDate || data.startDate;
+                        if (startDate) {
+                            $('#editStartDate').val(startDate.split('T')[0]);
+                        }
+                        
+                        const endDate = data.EndDate || data.endDate;
+                        if (endDate) {
+                            $('#editEndDate').val(endDate.split('T')[0]);
+                        }
+                        
+                        $('#editPaymentMethod').val(data.PaymentMethod || data.paymentMethod || '');
+                        $('#editVendor').val(data.Vendor || data.vendor || '');
+                        $('#editNotes').val(data.Notes || data.notes || '');
+                        $('#editIsActive').prop('checked', data.IsActive || data.isActive);
+                        
+                        // Show/hide day of month field
+                        if ($('#editRecurrenceType').val() === 'Monthly') {
+                            $('#editDayOfMonthContainer').show();
+                        } else {
+                            $('#editDayOfMonthContainer').hide();
+                        }
+                        
+                        // Show modal
+                        $('#editFixedExpenseModal').modal('show');
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error!',
+                            text: response.message || 'Failed to load fixed expense',
+                            confirmButtonColor: '#dc3545'
+                        });
+                    }
+                },
+                error: function(xhr) {
+                    Swal.close();
+                    console.error('Error loading fixed expense:', xhr.responseText);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: 'Error loading fixed expense details',
+                        confirmButtonColor: '#dc3545'
+                    });
+                }
+            });
+        }
+
+        function deleteFixedExpense(fixedExpenseId) {
+            Swal.fire({
+                title: 'Delete Fixed Expense?',
+                text: 'This will not delete expenses that were already generated. This action cannot be undone!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: 'Deleting...',
+                        text: 'Please wait',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    $.ajax({
+                        url: '@Url.Action("DeleteFixedExpense")',
+                        type: 'POST',
+                        data: {
+                            id: fixedExpenseId,
+                            __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Deleted!',
+                                    text: response.message,
+                                    timer: 2000,
+                                    showConfirmButton: false
+                                }).then(() => {
+                                    location.reload();
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error!',
+                                    text: response.message || 'Failed to delete fixed expense',
+                                    confirmButtonColor: '#dc3545'
+                                });
+                            }
+                        },
+                        error: function(xhr) {
+                            Swal.close();
+                            console.error('Error deleting fixed expense:', xhr.responseText);
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error!',
+                                text: 'Error deleting fixed expense',
+                                confirmButtonColor: '#dc3545'
+                            });
+                        }
+                    });
+                }
+            });
         }
     </script>
 }
