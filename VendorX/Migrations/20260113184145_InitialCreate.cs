@@ -12,6 +12,25 @@ namespace VendorX.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "AdminNotices",
+                columns: table => new
+                {
+                    NoticeId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Title = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    Message = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
+                    NoticeType = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ExpiresAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    TargetRole = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AdminNotices", x => x.NoticeId);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AspNetRoles",
                 columns: table => new
                 {
@@ -297,27 +316,28 @@ namespace VendorX.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Expenses",
+                name: "ExpenseCategories",
                 columns: table => new
                 {
-                    ExpenseId = table.Column<int>(type: "int", nullable: false)
+                    ExpenseCategoryId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    ExpenseName = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    ExpenseDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
-                    Category = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
-                    ShopId = table.Column<int>(type: "int", nullable: false)
+                    CategoryName = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    Icon = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Color = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    IsDefault = table.Column<bool>(type: "bit", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ShopId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Expenses", x => x.ExpenseId);
+                    table.PrimaryKey("PK_ExpenseCategories", x => x.ExpenseCategoryId);
                     table.ForeignKey(
-                        name: "FK_Expenses_Shops_ShopId",
+                        name: "FK_ExpenseCategories_Shops_ShopId",
                         column: x => x.ShopId,
                         principalTable: "Shops",
-                        principalColumn: "ShopId",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "ShopId");
                 });
 
             migrationBuilder.CreateTable(
@@ -445,6 +465,49 @@ namespace VendorX.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "FixedExpenses",
+                columns: table => new
+                {
+                    FixedExpenseId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ExpenseName = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
+                    ShopId = table.Column<int>(type: "int", nullable: false),
+                    ExpenseCategoryId = table.Column<int>(type: "int", nullable: false),
+                    RecurrenceType = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    RecurrenceInterval = table.Column<int>(type: "int", nullable: false),
+                    DayOfMonth = table.Column<int>(type: "int", nullable: true),
+                    DayOfWeek = table.Column<int>(type: "int", nullable: true),
+                    StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    EndDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    LastGenerated = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    NextDueDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    PaymentMethod = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    Vendor = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
+                    Notes = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FixedExpenses", x => x.FixedExpenseId);
+                    table.ForeignKey(
+                        name: "FK_FixedExpenses_ExpenseCategories_ExpenseCategoryId",
+                        column: x => x.ExpenseCategoryId,
+                        principalTable: "ExpenseCategories",
+                        principalColumn: "ExpenseCategoryId",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_FixedExpenses_Shops_ShopId",
+                        column: x => x.ShopId,
+                        principalTable: "Shops",
+                        principalColumn: "ShopId",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "BakiRecords",
                 columns: table => new
                 {
@@ -538,6 +601,51 @@ namespace VendorX.Migrations
                         principalTable: "Products",
                         principalColumn: "ProductId",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Expenses",
+                columns: table => new
+                {
+                    ExpenseId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ExpenseName = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    ExpenseDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
+                    ShopId = table.Column<int>(type: "int", nullable: false),
+                    ExpenseCategoryId = table.Column<int>(type: "int", nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    DueDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    PaymentMethod = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    ReceiptNumber = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    Vendor = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
+                    Notes = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    PaidAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    FixedExpenseId = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Expenses", x => x.ExpenseId);
+                    table.ForeignKey(
+                        name: "FK_Expenses_ExpenseCategories_ExpenseCategoryId",
+                        column: x => x.ExpenseCategoryId,
+                        principalTable: "ExpenseCategories",
+                        principalColumn: "ExpenseCategoryId",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Expenses_FixedExpenses_FixedExpenseId",
+                        column: x => x.FixedExpenseId,
+                        principalTable: "FixedExpenses",
+                        principalColumn: "FixedExpenseId");
+                    table.ForeignKey(
+                        name: "FK_Expenses_Shops_ShopId",
+                        column: x => x.ShopId,
+                        principalTable: "Shops",
+                        principalColumn: "ShopId",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -662,9 +770,34 @@ namespace VendorX.Migrations
                 filter: "[UserId] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Expenses_ShopId",
+                name: "IX_ExpenseCategories_ShopId_CategoryName",
+                table: "ExpenseCategories",
+                columns: new[] { "ShopId", "CategoryName" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Expenses_ExpenseCategoryId",
                 table: "Expenses",
-                column: "ShopId");
+                column: "ExpenseCategoryId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Expenses_FixedExpenseId",
+                table: "Expenses",
+                column: "FixedExpenseId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Expenses_ShopId_ExpenseDate",
+                table: "Expenses",
+                columns: new[] { "ShopId", "ExpenseDate" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_FixedExpenses_ExpenseCategoryId",
+                table: "FixedExpenses",
+                column: "ExpenseCategoryId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_FixedExpenses_ShopId_IsActive_NextDueDate",
+                table: "FixedExpenses",
+                columns: new[] { "ShopId", "IsActive", "NextDueDate" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Notifications_CustomerId",
@@ -757,6 +890,9 @@ namespace VendorX.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "AdminNotices");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
 
             migrationBuilder.DropTable(
@@ -799,6 +935,9 @@ namespace VendorX.Migrations
                 name: "BakiRecords");
 
             migrationBuilder.DropTable(
+                name: "FixedExpenses");
+
+            migrationBuilder.DropTable(
                 name: "Orders");
 
             migrationBuilder.DropTable(
@@ -806,6 +945,9 @@ namespace VendorX.Migrations
 
             migrationBuilder.DropTable(
                 name: "POSTransactions");
+
+            migrationBuilder.DropTable(
+                name: "ExpenseCategories");
 
             migrationBuilder.DropTable(
                 name: "Categories");

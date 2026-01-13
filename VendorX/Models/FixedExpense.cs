@@ -1,13 +1,12 @@
-using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace VendorX.Models
 {
-    public class Expense
+    public class FixedExpense
     {
         [Key]
-        public int ExpenseId { get; set; }
+        public int FixedExpenseId { get; set; }
 
         [Required]
         [StringLength(200)]
@@ -15,8 +14,6 @@ namespace VendorX.Models
 
         [Column(TypeName = "decimal(18, 2)")]
         public decimal Amount { get; set; }
-
-        public DateTime ExpenseDate { get; set; } = DateTime.UtcNow;
 
         [StringLength(1000)]
         public string? Description { get; set; }
@@ -28,17 +25,30 @@ namespace VendorX.Models
         public int ExpenseCategoryId { get; set; }
         public virtual ExpenseCategory ExpenseCategory { get; set; } = null!;
 
-        // Enhanced properties
+        // Recurrence settings
+        [Required]
         [StringLength(50)]
-        public string Status { get; set; } = "Pending"; // Pending, Paid, Overdue
+        public string RecurrenceType { get; set; } = "Monthly"; // Daily, Weekly, Monthly, Yearly
 
-        public DateTime? DueDate { get; set; }
+        public int RecurrenceInterval { get; set; } = 1; // Every X days/weeks/months/years
 
+        public int? DayOfMonth { get; set; } // For monthly: 1-31
+        
+        public int? DayOfWeek { get; set; } // For weekly: 0-6 (Sunday-Saturday)
+
+        public DateTime StartDate { get; set; } = DateTime.Today;
+
+        public DateTime? EndDate { get; set; } // Null = no end date
+
+        public DateTime? LastGenerated { get; set; } // Last time expense was auto-generated
+
+        public DateTime? NextDueDate { get; set; } // Next scheduled generation
+
+        public bool IsActive { get; set; } = true;
+
+        // Additional fields
         [StringLength(50)]
         public string? PaymentMethod { get; set; }
-
-        [StringLength(100)]
-        public string? ReceiptNumber { get; set; }
 
         [StringLength(200)]
         public string? Vendor { get; set; }
@@ -46,14 +56,11 @@ namespace VendorX.Models
         [StringLength(500)]
         public string? Notes { get; set; }
 
-        public DateTime? PaidAt { get; set; }
-
         public DateTime CreatedAt { get; set; } = DateTime.Now;
 
         public DateTime? UpdatedAt { get; set; }
 
-        // Link to fixed expense if this is auto-generated
-        public int? FixedExpenseId { get; set; }
-        public virtual FixedExpense? FixedExpense { get; set; }
+        // Navigation properties
+        public virtual ICollection<Expense> GeneratedExpenses { get; set; } = new List<Expense>();
     }
 }

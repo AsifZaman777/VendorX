@@ -1,0 +1,563 @@
+@model List<VendorX.ViewModels.ExpenseCategoryViewModel>
+
+@{
+    ViewData["Title"] = "Expense Management";
+    var totalExpenses = ViewBag.TotalExpenses ?? 0m;
+    var totalPending = ViewBag.TotalPending ?? 0m;
+    var totalPaid = ViewBag.TotalPaid ?? 0m;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0 text-gray-800">
+        <i class="bi bi-wallet2"></i> Expense Management
+    </h1>
+    <div>
+        <a asp-action="Categories" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Manage Categories
+        </a>
+        <a asp-action="FixedExpenses" class="btn btn-success">
+            <i class="bi bi-arrow-repeat"></i> Fixed Expenses
+        </a>
+    </div>
+</div>
+
+<!-- Summary Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-xl-4 col-md-6">
+        <div class="card border-left-primary shadow h-100">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Expenses</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">?@((decimal)totalExpenses).ToString("N2")</div>
+                        <small class="text-muted">All categories</small>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-cash-stack fs-2 text-primary"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-4 col-md-6">
+        <div class="card border-left-warning shadow h-100">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Pending Payment</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">?@((decimal)totalPending).ToString("N2")</div>
+                        <small class="text-muted">Outstanding</small>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-exclamation-triangle fs-2 text-warning"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-4 col-md-6">
+        <div class="card border-left-success shadow h-100">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Paid</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">?@((decimal)totalPaid).ToString("N2")</div>
+                        <small class="text-muted">Completed payments</small>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-check-circle fs-2 text-success"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Expense Category Cards -->
+<h5 class="mb-3">
+    <i class="bi bi-grid-3x3"></i> Expense Categories 
+    <span class="badge bg-secondary">@(Model?.Count ?? 0) categories</span>
+</h5>
+
+@if (Model == null || !Model.Any())
+{
+    <div class="alert alert-warning">
+        <i class="bi bi-exclamation-triangle"></i> No expense categories available. Please add categories first.
+    </div>
+}
+else
+{
+    <div class="row g-3 mb-4">
+        @foreach (var category in Model)
+        {
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
+                <div class="card expense-category-card shadow-sm h-100 border-start border-@category.Color border-4" 
+                     onclick="openCategoryModal(@category.ExpenseCategoryId, '@category.CategoryName', '@category.Icon', '@category.Color')"
+                     style="cursor: pointer;">
+                    <div class="card-body text-center p-3">
+                        <div class="expense-icon bg-@category.Color bg-opacity-10 p-3 rounded-3 mx-auto mb-3 d-inline-flex">
+                            <i class="bi @category.Icon fs-1 text-@category.Color"></i>
+                        </div>
+                        <h6 class="card-title mb-2 fw-bold text-truncate" title="@category.CategoryName">@category.CategoryName</h6>
+                        @if (category.TotalAmount > 0)
+                        {
+                            <h4 class="mb-1 text-@category.Color fw-bold">?@category.TotalAmount.ToString("N2")</h4>
+                            <div class="mb-2">
+                                <span class="badge bg-@category.Color bg-opacity-75">@category.ExpenseCount record(s)</span>
+                            </div>
+                            @if (category.PendingCount > 0)
+                            {
+                                <small class="text-warning d-block">
+                                    <i class="bi bi-clock-fill"></i> ?@category.PendingAmount.ToString("N2") due
+                                </small>
+                            }
+                            else
+                            {
+                                <small class="text-success d-block">
+                                    <i class="bi bi-check-circle-fill"></i> All settled
+                                </small>
+                            }
+                        }
+                        else
+                        {
+                            <h4 class="mb-1 text-secondary">?0.00</h4>
+                            <div class="mb-2">
+                                <span class="badge bg-light text-dark border">No records</span>
+                            </div>
+                            <small class="text-muted d-block">
+                                <i class="bi bi-plus-circle"></i> Click to add first expense
+                            </small>
+                        }
+                    </div>
+                    <div class="card-footer bg-@category.Color bg-opacity-10 border-0 text-center py-2">
+                        <small class="text-@category.Color fw-semibold">
+                            <i class="bi bi-hand-index"></i> Tap to manage
+                        </small>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<!-- Category Management Modal -->
+<div class="modal fade" id="categoryModal" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header" id="categoryModalHeader">
+                <h5 class="modal-title">
+                    <i class="bi" id="categoryIcon"></i>
+                    <span id="categoryTitle">Category Expenses</span>
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Action Buttons -->
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <button type="button" class="btn btn-primary" onclick="showAddExpenseForm()">
+                            <i class="bi bi-plus-circle"></i> Add Expense
+                        </button>
+                    </div>
+                    <div>
+                        <span class="badge bg-secondary" id="expenseCount">0 expenses</span>
+                    </div>
+                </div>
+
+                <!-- Add Expense Form (Hidden by default) -->
+                <div id="addExpenseForm" style="display: none;" class="mb-4">
+                    <div class="card border-primary">
+                        <div class="card-header bg-primary text-white">
+                            <h6 class="mb-0"><i class="bi bi-plus-square"></i> New Expense Entry</h6>
+                        </div>
+                        <div class="card-body">
+                            <form id="expenseForm">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="ExpenseCategoryId" id="selectedCategoryId" />
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold">Expense Title *</label>
+                                        <input type="text" name="Title" class="form-control" placeholder="e.g., January Electric Bill" required />
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold">Amount (?) *</label>
+                                        <input type="number" name="Amount" class="form-control" step="0.01" min="0.01" placeholder="0.00" required />
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Description</label>
+                                    <textarea name="Description" class="form-control" rows="2" placeholder="Additional details (optional)"></textarea>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label fw-bold">Expense Date *</label>
+                                        <input type="date" name="ExpenseDate" class="form-control" value="@DateTime.Today.ToString("yyyy-MM-dd")" required />
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label">Due Date</label>
+                                        <input type="date" name="DueDate" class="form-control" />
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label fw-bold">Status *</label>
+                                        <select name="Status" class="form-select" required>
+                                            <option value="Pending">Pending</option>
+                                            <option value="Paid">Paid</option>
+                                            <option value="Overdue">Overdue</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Payment Method</label>
+                                        <input type="text" name="PaymentMethod" class="form-control" placeholder="e.g., Cash, Bank, Bkash" list="paymentMethods" />
+                                        <datalist id="paymentMethods">
+                                            <option>Cash</option>
+                                            <option>Bank Transfer</option>
+                                            <option>Bkash</option>
+                                            <option>Nagad</option>
+                                            <option>Rocket</option>
+                                        </datalist>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Vendor/Supplier</label>
+                                        <input type="text" name="Vendor" class="form-control" placeholder="Name of service provider" />
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Receipt/Invoice Number</label>
+                                        <input type="text" name="ReceiptNumber" class="form-control" placeholder="Optional reference" />
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Notes</label>
+                                        <input type="text" name="Notes" class="form-control" placeholder="Any remarks" />
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="bi bi-save"></i> Save Expense
+                                    </button>
+                                    <button type="button" class="btn btn-secondary" onclick="hideAddExpenseForm()">
+                                        <i class="bi bi-x-circle"></i> Cancel
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Expenses List -->
+                <div id="expensesListContainer">
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let currentCategoryId = 0;
+        let currentCategoryName = '';
+        let currentCategoryIcon = '';
+        let currentCategoryColor = '';
+
+        function openCategoryModal(categoryId, categoryName, icon, color) {
+            currentCategoryId = categoryId;
+            currentCategoryName = categoryName;
+            currentCategoryIcon = icon;
+            currentCategoryColor = color;
+            
+            // Update modal appearance
+            $('#categoryIcon').attr('class', 'bi ' + icon);
+            $('#categoryTitle').text(categoryName);
+            $('#categoryModalHeader').removeClass().addClass('modal-header bg-' + color + ' text-white');
+            
+            // Set hidden category field
+            $('#selectedCategoryId').val(categoryId);
+            
+            // Hide add form
+            $('#addExpenseForm').hide();
+            
+            // Show modal
+            $('#categoryModal').modal('show');
+            
+            // Load expenses
+            loadCategoryExpenses(categoryId);
+        }
+
+        function loadCategoryExpenses(categoryId) {
+            $('#expensesListContainer').html(`
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary"></div>
+                </div>
+            `);
+
+            $.ajax({
+                url: '@Url.Action("GetExpensesByCategory")',
+                type: 'GET',
+                data: { categoryId: categoryId },
+                success: function(response) {
+                    console.log('Response received:', response); // Debug log
+                    if (response.success) {
+                        displayExpensesList(response.data);
+                    } else {
+                        showError(response.message || 'Failed to load expenses');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('AJAX Error:', error, xhr); // Debug log
+                    $('#expensesListContainer').html('<div class="alert alert-danger">Error loading expenses: ' + error + '</div>');
+                }
+            });
+        }
+
+        function displayExpensesList(expenses) {
+            $('#expenseCount').text(expenses.length + ' expense(s)');
+            
+            if (expenses.length === 0) {
+                $('#expensesListContainer').html(`
+                    <div class="alert alert-info text-center">
+                        <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                        <h5>No Expenses Recorded</h5>
+                        <p class="mb-0">Click "Add Expense" button to create your first expense.</p>
+                    </div>
+                `);
+                return;
+            }
+
+            let html = '<div class="table-responsive">';
+            html += '<table class="table table-hover align-middle">';
+            html += '<thead class="table-' + currentCategoryColor + '">';
+            html += '<tr><th>Details</th><th class="text-end">Amount</th><th>Date</th><th>Status</th><th>Vendor</th><th class="text-center">Actions</th></tr>';
+            html += '</thead><tbody>';
+
+            expenses.forEach(expense => {
+                // Safely handle all properties with defaults
+                const title = expense.Title || expense.title || 'Untitled';
+                const description = expense.Description || expense.description || '';
+                const amount = parseFloat(expense.Amount || expense.amount || 0);
+                const expenseDate = expense.ExpenseDate || expense.expenseDate || 'N/A';
+                const dueDate = expense.DueDate || expense.dueDate || null;
+                const status = expense.Status || expense.status || 'Pending';
+                const vendor = expense.Vendor || expense.vendor || '';
+                const paymentMethod = expense.PaymentMethod || expense.paymentMethod || '';
+                const receiptNumber = expense.ReceiptNumber || expense.receiptNumber || '';
+                const isFromFixed = expense.IsFromFixedExpense || expense.isFromFixedExpense || false;
+                const expenseId = expense.ExpenseId || expense.expenseId || 0;
+                
+                const statusBadge = status === 'Paid' ? 'success' : 
+                                   status === 'Pending' ? 'warning' : 'danger';
+                const statusIcon = status === 'Paid' ? 'check-circle-fill' : 
+                                  status === 'Pending' ? 'clock-fill' : 'exclamation-triangle-fill';
+                
+                html += `<tr>
+                    <td>
+                        <div class="fw-bold">${title}</div>
+                        ${description ? '<small class="text-muted">' + description + '</small>' : ''}
+                        ${receiptNumber ? '<br><small class="badge bg-secondary">Ref: ' + receiptNumber + '</small>' : ''}
+                        ${isFromFixed ? '<br><span class="badge bg-info"><i class="bi bi-arrow-repeat"></i> Auto-generated</span>' : ''}
+                    </td>
+                    <td class="text-end"><strong class="text-${currentCategoryColor} fs-5">?${amount.toLocaleString('en-BD', {minimumFractionDigits: 2})}</strong></td>
+                    <td>
+                        <div><i class="bi bi-calendar-event"></i> ${expenseDate}</div>
+                        ${dueDate ? '<small class="text-warning"><i class="bi bi-alarm"></i> Due: ' + dueDate + '</small>' : ''}
+                    </td>
+                    <td><span class="badge bg-${statusBadge}"><i class="bi bi-${statusIcon}"></i> ${status}</span></td>
+                    <td>
+                        ${vendor ? '<div><i class="bi bi-building"></i> ' + vendor + '</div>' : '<span class="text-muted">-</span>'}
+                        ${paymentMethod ? '<small class="text-muted"><i class="bi bi-credit-card"></i> ' + paymentMethod + '</small>' : ''}
+                    </td>
+                    <td class="text-center">
+                        <div class="btn-group btn-group-sm">
+                            ${status !== 'Paid' && !isFromFixed ? `
+                                <button class="btn btn-success" onclick="markAsPaid(${expenseId})" title="Mark as Paid">
+                                    <i class="bi bi-check-lg"></i>
+                                </button>` : '<button class="btn btn-light disabled"><i class="bi bi-check-all"></i></button>'}
+                            ${!isFromFixed ? `
+                                <button class="btn btn-danger" onclick="deleteExpense(${expenseId})" title="Delete">
+                                    <i class="bi bi-trash"></i>
+                                </button>` : ''}
+                        </div>
+                    </td>
+                </tr>`;
+            });
+
+            html += '</tbody></table></div>';
+            
+            // Add summary cards
+            const total = expenses.reduce((sum, e) => sum + parseFloat(e.Amount || e.amount || 0), 0);
+            const pending = expenses.filter(e => (e.Status || e.status) === 'Pending').reduce((sum, e) => sum + parseFloat(e.Amount || e.amount || 0), 0);
+            const paid = total - pending;
+            
+            html += `
+                <div class="row g-3 mt-3">
+                    <div class="col-md-4">
+                        <div class="card bg-${currentCategoryColor} text-white">
+                            <div class="card-body py-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <small class="text-white-50">Total Spent</small>
+                                        <h4 class="mb-0">?${total.toLocaleString('en-BD', {minimumFractionDigits: 2})}</h4>
+                                    </div>
+                                    <i class="bi bi-cash-stack fs-1 opacity-50"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-warning text-dark">
+                            <div class="card-body py-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <small>Pending</small>
+                                        <h4 class="mb-0">?${pending.toLocaleString('en-BD', {minimumFractionDigits: 2})}</h4>
+                                    </div>
+                                    <i class="bi bi-hourglass-split fs-1 opacity-50"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-success text-white">
+                            <div class="card-body py-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <small class="text-white-50">Paid</small>
+                                        <h4 class="mb-0">?${paid.toLocaleString('en-BD', {minimumFractionDigits: 2})}</h4>
+                                    </div>
+                                    <i class="bi bi-check-circle-fill fs-1 opacity-50"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            $('#expensesListContainer').html(html);
+        }
+
+        function showAddExpenseForm() {
+            $('#addExpenseForm').slideDown();
+            $('input[name="Title"]').focus();
+        }
+
+        function hideAddExpenseForm() {
+            $('#addExpenseForm').slideUp();
+            $('#expenseForm')[0].reset();
+        }
+
+        $('#expenseForm').on('submit', function(e) {
+            e.preventDefault();
+            
+            $.ajax({
+                url: '@Url.Action("CreateExpense")',
+                type: 'POST',
+                data: $(this).serialize(),
+                success: function(response) {
+                    if (response.success) {
+                        showSuccess(response.message);
+                        hideAddExpenseForm();
+                        loadCategoryExpenses(currentCategoryId);
+                        setTimeout(() => location.reload(), 1500);
+                    } else {
+                        showError(response.message);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Create expense error:', xhr.responseText);
+                    showError('Error creating expense: ' + error);
+                }
+            });
+        });
+
+        function markAsPaid(expenseId) {
+            if (!confirm('Mark this expense as paid?')) return;
+            
+            $.ajax({
+                url: '@Url.Action("MarkAsPaid")',
+                type: 'POST',
+                data: { 
+                    id: expenseId,
+                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(response) {
+                    if (response.success) {
+                        showSuccess(response.message);
+                        loadCategoryExpenses(currentCategoryId);
+                        setTimeout(() => location.reload(), 1500);
+                    } else {
+                        showError(response.message);
+                    }
+                },
+                error: function(xhr) {
+                    console.error('Mark as paid error:', xhr.responseText);
+                    showError('Error marking expense as paid');
+                }
+            });
+        }
+
+        function deleteExpense(expenseId) {
+            if (!confirm('Delete this expense? This cannot be undone.')) return;
+            
+            $.ajax({
+                url: '@Url.Action("DeleteExpense")',
+                type: 'POST',
+                data: { 
+                    id: expenseId,
+                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(response) {
+                    if (response.success) {
+                        showSuccess(response.message);
+                        loadCategoryExpenses(currentCategoryId);
+                        setTimeout(() => location.reload(), 1500);
+                    } else {
+                        showError(response.message);
+                    }
+                },
+                error: function(xhr) {
+                    console.error('Delete expense error:', xhr.responseText);
+                    showError('Error deleting expense');
+                }
+            });
+        }
+    </script>
+
+    <style>
+        .expense-category-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .expense-category-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15) !important;
+        }
+
+        .expense-icon {
+            width: 70px;
+            height: 70px;
+            transition: all 0.4s ease;
+        }
+
+        .expense-category-card:hover .expense-icon {
+            transform: rotate(360deg) scale(1.15);
+        }
+
+        .border-left-primary { border-left-color: #4e73df !important; }
+        .border-left-success { border-left-color: #1cc88a !important; }
+        .border-left-warning { border-left-color: #f6c23e !important; }
+    </style>
+}

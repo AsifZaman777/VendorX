@@ -38,7 +38,11 @@ namespace VendorX.Models
         public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
         public virtual ICollection<POSTransaction> POSTransactions { get; set; } = new List<POSTransaction>();
         public virtual ICollection<Baki> BakiRecords { get; set; } = new List<Baki>();
-        public virtual ICollection<Expense> Expenses { get; set; } = new List<Expense>();
         public virtual ICollection<ShopCustomer> ShopCustomers { get; set; } = new List<ShopCustomer>();
+        
+        // Expense navigation properties
+        public virtual ICollection<Expense> Expenses { get; set; } = new List<Expense>();
+        public virtual ICollection<ExpenseCategory> ExpenseCategories { get; set; } = new List<ExpenseCategory>();
+        public virtual ICollection<FixedExpense> FixedExpenses { get; set; } = new List<FixedExpense>();
     }
 }

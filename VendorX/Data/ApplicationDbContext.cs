@@ -22,9 +22,13 @@ namespace VendorX.Models
         public DbSet<Baki> BakiRecords { get; set; }
         public DbSet<BakiInvoice> BakiInvoices { get; set; }
         public DbSet<BakiInvoiceItem> BakiInvoiceItems { get; set; }
-        public DbSet<Expense> Expenses { get; set; }
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<AdminNotice> AdminNotices { get; set; }
+        
+        // Expense entities
+        public DbSet<Expense> Expenses { get; set; }
+        public DbSet<ExpenseCategory> ExpenseCategories { get; set; }
+        public DbSet<FixedExpense> FixedExpenses { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -123,7 +127,45 @@ namespace VendorX.Models
                 .HasOne(e => e.Shop)
                 .WithMany(s => s.Expenses)
                 .HasForeignKey(e => e.ShopId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired();  // ShopId is required
+
+            modelBuilder.Entity<Expense>()
+                .HasOne(e => e.ExpenseCategory)
+                .WithMany(ec => ec.Expenses)
+                .HasForeignKey(e => e.ExpenseCategoryId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired();  // ExpenseCategoryId is required
+
+            modelBuilder.Entity<Expense>()
+                .HasOne(e => e.FixedExpense)
+                .WithMany(fe => fe.GeneratedExpenses)
+                .HasForeignKey(e => e.FixedExpenseId)
+                .OnDelete(DeleteBehavior.ClientSetNull)  // Changed to ClientSetNull for nullable FK
+                .IsRequired(false);  // FixedExpenseId is optional
+
+            // Configure ExpenseCategory relationships
+            modelBuilder.Entity<ExpenseCategory>()
+                .HasOne(ec => ec.Shop)
+                .WithMany(s => s.ExpenseCategories)
+                .HasForeignKey(ec => ec.ShopId)
+                .OnDelete(DeleteBehavior.ClientSetNull)  // Changed to ClientSetNull for nullable FK
+                .IsRequired(false);  // ShopId is optional (null for default categories)
+
+            // Configure FixedExpense relationships
+            modelBuilder.Entity<FixedExpense>()
+                .HasOne(fe => fe.Shop)
+                .WithMany(s => s.FixedExpenses)
+                .HasForeignKey(fe => fe.ShopId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired();  // ShopId is required
+
+            modelBuilder.Entity<FixedExpense>()
+                .HasOne(fe => fe.ExpenseCategory)
+                .WithMany(ec => ec.FixedExpenses)
+                .HasForeignKey(fe => fe.ExpenseCategoryId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired();  // ExpenseCategoryId is required
 
             // Add indexes for better query performance
             modelBuilder.Entity<Shop>()
@@ -141,6 +183,15 @@ namespace VendorX.Models
             modelBuilder.Entity<BakiInvoice>()
                 .HasIndex(b => b.InvoiceNumber)
                 .IsUnique();
+
+            modelBuilder.Entity<ExpenseCategory>()
+                .HasIndex(ec => new { ec.ShopId, ec.CategoryName });
+
+            modelBuilder.Entity<Expense>()
+                .HasIndex(e => new { e.ShopId, e.ExpenseDate });
+
+            modelBuilder.Entity<FixedExpense>()
+                .HasIndex(fe => new { fe.ShopId, fe.IsActive, fe.NextDueDate });
         }
     }
 }

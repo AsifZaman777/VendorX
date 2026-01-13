@@ -136,11 +136,12 @@ namespace VendorX.Areas.ShopKeeper.Controllers
 
             var expenses = await _context.Expenses
                 .Where(e => e.ShopId == shop.ShopId && e.ExpenseDate >= from && e.ExpenseDate <= to)
+                .Include(e => e.ExpenseCategory)
                 .OrderByDescending(e => e.ExpenseDate)
                 .ToListAsync();
 
             var expensesByCategory = expenses
-                .GroupBy(e => e.Category ?? "Uncategorized")
+                .GroupBy(e => e.ExpenseCategory.CategoryName ?? "Uncategorized")
                 .ToDictionary(g => g.Key, g => g.Sum(e => e.Amount));
 
             var model = new ExpenseReportViewModel
@@ -151,7 +152,7 @@ namespace VendorX.Areas.ShopKeeper.Controllers
                 Expenses = expenses.Select(e => new ExpenseSummary
                 {
                     ExpenseName = e.ExpenseName,
-                    Category = e.Category,
+                    Category = e.ExpenseCategory?.CategoryName,
                     ExpenseDate = e.ExpenseDate,
                     Amount = e.Amount
                 }).ToList(),

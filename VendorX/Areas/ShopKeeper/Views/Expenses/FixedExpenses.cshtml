@@ -1,0 +1,224 @@
+@model List<VendorX.ViewModels.FixedExpenseViewModel>
+
+@{
+    ViewData["Title"] = "Fixed Expenses";
+    var categories = ViewBag.Categories as List<VendorX.Models.ExpenseCategory>;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0 text-gray-800">
+        <i class="bi bi-arrow-repeat"></i> Fixed Expenses (Recurring)
+    </h1>
+    <div>
+        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createFixedExpenseModal">
+            <i class="bi bi-plus-circle"></i> Add Fixed Expense
+        </button>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Expenses
+        </a>
+    </div>
+</div>
+
+<div class="alert alert-info">
+    <i class="bi bi-info-circle"></i> <strong>Fixed Expenses</strong> are automatically generated based on your schedule. 
+    They help you track recurring costs like rent, utilities, and subscriptions.
+</div>
+
+@if (Model == null || !Model.Any())
+{
+    <div class="alert alert-warning">
+        <i class="bi bi-exclamation-triangle"></i> No fixed expenses set up yet. Click "Add Fixed Expense" to create your first recurring expense.
+    </div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-primary">
+                <tr>
+                    <th>Expense Name</th>
+                    <th>Category</th>
+                    <th class="text-end">Amount</th>
+                    <th>Recurrence</th>
+                    <th>Next Due</th>
+                    <th>Status</th>
+                    <th class="text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var expense in Model)
+                {
+                    <tr class="@(expense.IsActive ? "" : "table-secondary")">
+                        <td>
+                            <strong>@expense.ExpenseName</strong>
+                            @if (!string.IsNullOrEmpty(expense.Description))
+                            {
+                                <br /><small class="text-muted">@expense.Description</small>
+                            }
+                        </td>
+                        <td><span class="badge bg-primary">@expense.ExpenseCategoryName</span></td>
+                        <td class="text-end"><strong class="text-primary">?@expense.Amount.ToString("N2")</strong></td>
+                        <td>
+                            <i class="bi bi-arrow-repeat"></i> @expense.RecurrenceType
+                            @if (expense.RecurrenceInterval > 1)
+                            {
+                                <span>(Every @expense.RecurrenceInterval)</span>
+                            }
+                        </td>
+                        <td>
+                            @if (expense.NextDueDate.HasValue)
+                            {
+                                <i class="bi bi-calendar-event"></i>
+                                @expense.NextDueDate.Value.ToString("MMM dd, yyyy")
+                            }
+                            else
+                            {
+                                <span class="text-muted">-</span>
+                            }
+                        </td>
+                        <td>
+                            @if (expense.IsActive)
+                            {
+                                <span class="badge bg-success"><i class="bi bi-check-circle"></i> Active</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary"><i class="bi bi-pause-circle"></i> Paused</span>
+                            }
+                        </td>
+                        <td class="text-center">
+                            <form asp-action="ToggleFixedExpense" asp-route-id="@expense.FixedExpenseId" method="post" style="display: inline;">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-sm btn-@(expense.IsActive ? "warning" : "success")" 
+                                        title="@(expense.IsActive ? "Pause" : "Activate")">
+                                    <i class="bi bi-@(expense.IsActive ? "pause" : "play")-circle"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+<!-- Create Fixed Expense Modal -->
+<div class="modal fade" id="createFixedExpenseModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title"><i class="bi bi-plus-circle"></i> Create Fixed Expense</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="CreateFixedExpense" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Expense Name *</label>
+                            <input type="text" name="ExpenseName" class="form-control" placeholder="e.g., Monthly Rent" required />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Category *</label>
+                            <select name="ExpenseCategoryId" class="form-select" required>
+                                <option value="">Select Category</option>
+                                @if (categories != null)
+                                {
+                                    @foreach (var cat in categories)
+                                    {
+                                        <option value="@cat.ExpenseCategoryId">@cat.CategoryName</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Amount (?) *</label>
+                            <input type="number" name="Amount" class="form-control" step="0.01" min="0.01" required />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Recurrence Type *</label>
+                            <select name="RecurrenceType" class="form-select" id="recurrenceType" required>
+                                <option value="Daily">Daily</option>
+                                <option value="Weekly">Weekly</option>
+                                <option value="Monthly" selected>Monthly</option>
+                                <option value="Yearly">Yearly</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Recurrence Interval</label>
+                            <input type="number" name="RecurrenceInterval" class="form-control" value="1" min="1" />
+                            <small class="text-muted">Every X days/weeks/months/years</small>
+                        </div>
+                        <div class="col-md-6 mb-3" id="dayOfMonthContainer" style="display:none;">
+                            <label class="form-label">Day of Month</label>
+                            <input type="number" name="DayOfMonth" class="form-control" min="1" max="31" placeholder="1-31" />
+                            <small class="text-muted">For monthly expenses</small>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea name="Description" class="form-control" rows="2"></textarea>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Start Date *</label>
+                            <input type="date" name="StartDate" class="form-control" value="@DateTime.Today.ToString("yyyy-MM-dd")" required />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">End Date (Optional)</label>
+                            <input type="date" name="EndDate" class="form-control" />
+                            <small class="text-muted">Leave empty for no end date</small>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Payment Method</label>
+                            <input type="text" name="PaymentMethod" class="form-control" placeholder="e.g., Bank Auto-debit" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Vendor</label>
+                            <input type="text" name="Vendor" class="form-control" placeholder="Service provider name" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Notes</label>
+                        <textarea name="Notes" class="form-control" rows="2" placeholder="Any additional information"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-save"></i> Create Fixed Expense
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $('#recurrenceType').on('change', function() {
+            if ($(this).val() === 'Monthly') {
+                $('#dayOfMonthContainer').show();
+            } else {
+                $('#dayOfMonthContainer').hide();
+            }
+        });
+
+        // Show/hide on page load
+        if ($('#recurrenceType').val() === 'Monthly') {
+            $('#dayOfMonthContainer').show();
+        }
+    </script>
+}

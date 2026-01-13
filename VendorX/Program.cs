@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using VendorX.Models;
 using VendorX.Services;
 using VendorX.Data;
+using VendorX.BackgroundServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -49,6 +50,10 @@ builder.Services.AddScoped<IShopService, ShopService>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<IBakiService, BakiService>();
 builder.Services.AddScoped<IAdminNoticeService, AdminNoticeService>();
+builder.Services.AddScoped<IFixedExpenseService, FixedExpenseService>();
+
+// Register background services
+builder.Services.AddHostedService<FixedExpenseBackgroundService>();
 
 var app = builder.Build();
 

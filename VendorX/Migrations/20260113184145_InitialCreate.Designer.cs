@@ -12,7 +12,7 @@ using VendorX.Models;
 namespace VendorX.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260102165953_InitialCreate")]
+    [Migration("20260113184145_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -156,6 +156,47 @@ namespace VendorX.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("VendorX.Models.AdminNotice", b =>
+                {
+                    b.Property<int>("NoticeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("NoticeId"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ExpiresAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("NoticeType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("TargetRole")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("NoticeId");
+
+                    b.ToTable("AdminNotices");
                 });
 
             modelBuilder.Entity("VendorX.Models.ApplicationUser", b =>
@@ -452,13 +493,18 @@ namespace VendorX.Migrations
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(18, 2)");
 
-                    b.Property<string>("Category")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTime?>("DueDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ExpenseCategoryId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("ExpenseDate")
                         .HasColumnType("datetime2");
@@ -468,14 +514,176 @@ namespace VendorX.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<int?>("FixedExpenseId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime?>("PaidAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("PaymentMethod")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("ReceiptNumber")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<int>("ShopId")
                         .HasColumnType("int");
 
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Vendor")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
                     b.HasKey("ExpenseId");
 
-                    b.HasIndex("ShopId");
+                    b.HasIndex("ExpenseCategoryId");
+
+                    b.HasIndex("FixedExpenseId");
+
+                    b.HasIndex("ShopId", "ExpenseDate");
 
                     b.ToTable("Expenses");
+                });
+
+            modelBuilder.Entity("VendorX.Models.ExpenseCategory", b =>
+                {
+                    b.Property<int>("ExpenseCategoryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ExpenseCategoryId"));
+
+                    b.Property<string>("CategoryName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Color")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Icon")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDefault")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("ShopId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ExpenseCategoryId");
+
+                    b.HasIndex("ShopId", "CategoryName");
+
+                    b.ToTable("ExpenseCategories");
+                });
+
+            modelBuilder.Entity("VendorX.Models.FixedExpense", b =>
+                {
+                    b.Property<int>("FixedExpenseId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("FixedExpenseId"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18, 2)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("DayOfMonth")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("DayOfWeek")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTime?>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ExpenseCategoryId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ExpenseName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastGenerated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("NextDueDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("PaymentMethod")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int>("RecurrenceInterval")
+                        .HasColumnType("int");
+
+                    b.Property<string>("RecurrenceType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int>("ShopId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Vendor")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("FixedExpenseId");
+
+                    b.HasIndex("ExpenseCategoryId");
+
+                    b.HasIndex("ShopId", "IsActive", "NextDueDate");
+
+                    b.ToTable("FixedExpenses");
                 });
 
             modelBuilder.Entity("VendorX.Models.Notification", b =>
@@ -945,11 +1153,53 @@ namespace VendorX.Migrations
 
             modelBuilder.Entity("VendorX.Models.Expense", b =>
                 {
+                    b.HasOne("VendorX.Models.ExpenseCategory", "ExpenseCategory")
+                        .WithMany("Expenses")
+                        .HasForeignKey("ExpenseCategoryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("VendorX.Models.FixedExpense", "FixedExpense")
+                        .WithMany("GeneratedExpenses")
+                        .HasForeignKey("FixedExpenseId");
+
                     b.HasOne("VendorX.Models.Shop", "Shop")
                         .WithMany("Expenses")
                         .HasForeignKey("ShopId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("ExpenseCategory");
+
+                    b.Navigation("FixedExpense");
+
+                    b.Navigation("Shop");
+                });
+
+            modelBuilder.Entity("VendorX.Models.ExpenseCategory", b =>
+                {
+                    b.HasOne("VendorX.Models.Shop", "Shop")
+                        .WithMany("ExpenseCategories")
+                        .HasForeignKey("ShopId");
+
+                    b.Navigation("Shop");
+                });
+
+            modelBuilder.Entity("VendorX.Models.FixedExpense", b =>
+                {
+                    b.HasOne("VendorX.Models.ExpenseCategory", "ExpenseCategory")
+                        .WithMany("FixedExpenses")
+                        .HasForeignKey("ExpenseCategoryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("VendorX.Models.Shop", "Shop")
+                        .WithMany("FixedExpenses")
+                        .HasForeignKey("ShopId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ExpenseCategory");
 
                     b.Navigation("Shop");
                 });
@@ -1115,6 +1365,18 @@ namespace VendorX.Migrations
                     b.Navigation("ShopCustomers");
                 });
 
+            modelBuilder.Entity("VendorX.Models.ExpenseCategory", b =>
+                {
+                    b.Navigation("Expenses");
+
+                    b.Navigation("FixedExpenses");
+                });
+
+            modelBuilder.Entity("VendorX.Models.FixedExpense", b =>
+                {
+                    b.Navigation("GeneratedExpenses");
+                });
+
             modelBuilder.Entity("VendorX.Models.Order", b =>
                 {
                     b.Navigation("OrderItems");
@@ -1138,7 +1400,11 @@ namespace VendorX.Migrations
 
                     b.Navigation("Categories");
 
+                    b.Navigation("ExpenseCategories");
+
                     b.Navigation("Expenses");
+
+                    b.Navigation("FixedExpenses");
 
                     b.Navigation("Orders");
 
