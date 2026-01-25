@@ -1,145 +1,1170 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "VendorX - Smart Business Management for Retailers";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome to VendorX</h1>
-    <p class="lead">Complete Vendor/Shop Management System</p>
-</div>
+<!-- Required CDNs -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
 
-<div class="row mt-5">
-    <div class="col-md-4">
-        <div class="card shadow-sm h-100">
-            <div class="card-body text-center">
-                <i class="fas fa-user-shield fa-3x text-primary mb-3"></i>
-                <h5 class="card-title">SuperAdmin</h5>
-                <p class="card-text">Manage all shops and customers across the platform. Full system administration and oversight.</p>
-                @if (!User.Identity?.IsAuthenticated == true)
-                {
-                    <a asp-controller="Account" asp-action="Login" class="btn btn-primary">Login</a>
-                }
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card shadow-sm h-100">
-            <div class="card-body text-center">
-                <i class="fas fa-store fa-3x text-success mb-3"></i>
-                <h5 class="card-title">ShopKeeper</h5>
-                <p class="card-text">Manage your shop, process sales, handle orders, track inventory, and manage customer credit (Baki).</p>
-                @if (!User.Identity?.IsAuthenticated == true)
-                {
-                    <a asp-controller="Account" asp-action="Register" class="btn btn-success">Register</a>
-                }
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card shadow-sm h-100">
-            <div class="card-body text-center">
-                <i class="fas fa-user fa-3x text-info mb-3"></i>
-                <h5 class="card-title">Customer</h5>
-                <p class="card-text">Register to shops, make purchases, track orders, and manage your Baki (credit) across multiple shops.</p>
-                @if (!User.Identity?.IsAuthenticated == true)
-                {
-                    <a asp-controller="Account" asp-action="Register" class="btn btn-info">Register</a>
-                }
-            </div>
-        </div>
-    </div>
-</div>
+<style>
+    :root {
+        --primary: #2563eb;
+        --primary-dark: #1d4ed8;
+        --secondary: #7c3aed;
+        --accent: #f43f5e;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --dark: #1f2937;
+        --gray-700: #374151;
+        --gray-500: #6b7280;
+        --gray-300: #d1d5db;
+        --gray-100: #f3f4f6;
+        --white: #ffffff;
+    }
 
-<div class="row mt-5">
-    <div class="col-12">
-        <h2 class="text-center mb-4">Key Features</h2>
-    </div>
-    <div class="col-md-6 col-lg-3 mb-4">
-        <div class="card border-primary">
-            <div class="card-body text-center">
-                <i class="fas fa-cash-register fa-2x text-primary mb-3"></i>
-                <h6 class="card-title">Point of Sale</h6>
-                <p class="card-text small">Fast and efficient POS system with instant notifications</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-6 col-lg-3 mb-4">
-        <div class="card border-success">
-            <div class="card-body text-center">
-                <i class="fas fa-money-bill-wave fa-2x text-success mb-3"></i>
-                <h6 class="card-title">Baki Management</h6>
-                <p class="card-text small">Track credit purchases and monthly settlements</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-6 col-lg-3 mb-4">
-        <div class="card border-info">
-            <div class="card-body text-center">
-                <i class="fas fa-box fa-2x text-info mb-3"></i>
-                <h6 class="card-title">Order Management</h6>
-                <p class="card-text small">Create and track pending orders with delivery status</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-6 col-lg-3 mb-4">
-        <div class="card border-warning">
-            <div class="card-body text-center">
-                <i class="fas fa-chart-bar fa-2x text-warning mb-3"></i>
-                <h6 class="card-title">Reports & Analytics</h6>
-                <p class="card-text small">Comprehensive reports for sales, expenses, and profit</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-6 col-lg-3 mb-4">
-        <div class="card border-danger">
-            <div class="card-body text-center">
-                <i class="fas fa-qrcode fa-2x text-danger mb-3"></i>
-                <h6 class="card-title">QR Registration</h6>
-                <p class="card-text small">Easy customer registration via QR codes</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-6 col-lg-3 mb-4">
-        <div class="card border-secondary">
-            <div class="card-body text-center">
-                <i class="fas fa-bell fa-2x text-secondary mb-3"></i>
-                <h6 class="card-title">Notifications</h6>
-                <p class="card-text small">Email and WhatsApp notifications for all transactions</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-6 col-lg-3 mb-4">
-        <div class="card border-primary">
-            <div class="card-body text-center">
-                <i class="fas fa-boxes fa-2x text-primary mb-3"></i>
-                <h6 class="card-title">Inventory</h6>
-                <p class="card-text small">Manage products and categories efficiently</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-6 col-lg-3 mb-4">
-        <div class="card border-success">
-            <div class="card-body text-center">
-                <i class="fas fa-receipt fa-2x text-success mb-3"></i>
-                <h6 class="card-title">Invoicing</h6>
-                <p class="card-text small">Generate and send monthly Baki invoices</p>
-            </div>
-        </div>
-    </div>
-</div>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
 
-@if (!User.Identity?.IsAuthenticated == true)
-{
-    <div class="row mt-5">
-        <div class="col-12">
-            <div class="alert alert-info text-center" role="alert">
-                <h4 class="alert-heading"><i class="fas fa-info-circle"></i> Getting Started</h4>
-                <p>Choose your role and register to start using VendorX. ShopKeepers can manage their shops and customers, while Customers can register to multiple shops and track their purchases.</p>
-                <hr>
-                <p class="mb-0">
-                    <a asp-controller="Account" asp-action="Register" class="btn btn-primary me-2">Register Now</a>
-                    <a asp-controller="Account" asp-action="Login" class="btn btn-outline-primary">Already have an account? Login</a>
-                </p>
+    body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        line-height: 1.6;
+        color: var(--dark);
+        overflow-x: hidden;
+    }
+
+    /* Typography */
+    h1, h2, h3, h4, h5, h6 {
+        font-weight: 700;
+        line-height: 1.2;
+    }
+
+    .display-1 {
+        font-size: 3.5rem;
+        font-weight: 800;
+    }
+
+    .display-2 {
+        font-size: 2.8rem;
+        font-weight: 700;
+    }
+
+    .lead-lg {
+        font-size: 1.25rem;
+        font-weight: 400;
+    }
+
+    /* Navbar */
+    .navbar {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        padding: 1rem 0;
+        position: fixed;
+        top: 0;
+        width: 100%;
+        z-index: 1000;
+        transition: all 0.3s ease;
+    }
+
+    .navbar-scrolled {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        padding: 0.8rem 0;
+    }
+
+    .navbar-brand {
+        font-weight: 800;
+        font-size: 1.75rem;
+        color: var(--primary) !important;
+    }
+
+    .nav-link {
+        font-weight: 500;
+        padding: 0.5rem 1rem !important;
+        color: var(--gray-700) !important;
+        transition: all 0.3s ease;
+        border-radius: 8px;
+    }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: var(--primary) !important;
+            background: rgba(37, 99, 235, 0.08);
+        }
+
+    /* Hero Section */
+    .hero-section {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        position: relative;
+        overflow: hidden;
+        padding-top: 80px;
+    }
+
+    .hero-gradient {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 60%;
+        height: 100%;
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        clip-path: polygon(25% 0%, 100% 0%, 100% 100%, 0% 100%);
+        opacity: 0.1;
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .hero-stats {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .stat-item {
+        text-align: center;
+        padding: 0 1.5rem;
+        border-right: 1px solid var(--gray-300);
+    }
+
+        .stat-item:last-child {
+            border-right: none;
+        }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: var(--primary);
+        line-height: 1;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        font-size: 0.9rem;
+        color: var(--gray-500);
+        font-weight: 500;
+    }
+
+    /* Buttons */
+    .btn {
+        padding: 0.75rem 2rem;
+        border-radius: 10px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: none;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        border: none;
+    }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3);
+        }
+
+    .btn-outline-primary {
+        border: 2px solid var(--primary);
+        color: var(--primary);
+    }
+
+        .btn-outline-primary:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(37, 99, 235, 0.2);
+        }
+
+    .btn-lg {
+        padding: 1rem 2.5rem;
+        font-size: 1.1rem;
+    }
+
+    /* Section Styles */
+    section {
+        padding: 5rem 0;
+    }
+
+    .section-header {
+        text-align: center;
+        margin-bottom: 4rem;
+    }
+
+    .section-subtitle {
+        color: var(--primary);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+    }
+
+    .section-title {
+        font-size: 2.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .section-description {
+        color: var(--gray-500);
+        font-size: 1.1rem;
+        max-width: 700px;
+        margin: 0 auto;
+    }
+
+    /* Feature Cards */
+    .feature-card {
+        background: white;
+        border-radius: 16px;
+        padding: 2.5rem;
+        height: 100%;
+        border: 1px solid var(--gray-300);
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+    }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.08);
+            border-color: var(--primary);
+        }
+
+    .feature-icon {
+        width: 70px;
+        height: 70px;
+        background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(37, 99, 235, 0.05) 100%);
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1.5rem;
+    }
+
+        .feature-icon i {
+            font-size: 1.8rem;
+            color: var(--primary);
+        }
+
+    .feature-title {
+        font-size: 1.3rem;
+        margin-bottom: 1rem;
+        color: var(--dark);
+    }
+
+    .feature-description {
+        color: var(--gray-500);
+        line-height: 1.6;
+    }
+
+    /* Pricing Cards */
+    .pricing-card {
+        border-radius: 20px;
+        overflow: hidden;
+        border: 1px solid var(--gray-300);
+        transition: all 0.3s ease;
+        height: 100%;
+        background: white;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+    }
+
+        .pricing-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+        }
+
+        .pricing-card.popular {
+            border: 2px solid var(--primary);
+            transform: scale(1.05);
+            position: relative;
+            overflow: visible;
+        }
+
+    .popular-badge {
+        position: absolute;
+        top: -12px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: white;
+        padding: 0.5rem 1.5rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
+    }
+
+    .pricing-header {
+        padding: 2.5rem;
+        text-align: center;
+        background: var(--gray-100);
+    }
+
+    .pricing-card.popular .pricing-header {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: white;
+    }
+
+    .pricing-title {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .pricing-price {
+        font-size: 3rem;
+        font-weight: 800;
+        line-height: 1;
+        margin-bottom: 0.5rem;
+    }
+
+    .pricing-period {
+        color: var(--gray-500);
+        font-size: 1rem;
+    }
+
+    .pricing-card.popular .pricing-period {
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    .pricing-features {
+        padding: 2.5rem;
+        list-style: none;
+    }
+
+        .pricing-features li {
+            padding: 0.5rem 0;
+            color: var(--gray-700);
+            display: flex;
+            align-items: center;
+        }
+
+            .pricing-features li i {
+                margin-right: 0.75rem;
+                color: var(--success);
+                font-size: 0.9rem;
+            }
+
+            .pricing-features li.disabled {
+                color: var(--gray-500);
+            }
+
+                .pricing-features li.disabled i {
+                    color: var(--gray-500);
+                }
+
+    .pricing-cta {
+        padding: 0 2.5rem 2.5rem;
+    }
+
+    /* Testimonials */
+    .testimonial-section {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    }
+
+    .testimonial-card {
+        background: white;
+        border-radius: 20px;
+        padding: 2.5rem;
+        height: 100%;
+        border: 1px solid var(--gray-300);
+        position: relative;
+    }
+
+    .testimonial-rating {
+        color: var(--warning);
+        font-size: 1.2rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .testimonial-text {
+        font-size: 1.1rem;
+        line-height: 1.7;
+        color: var(--gray-700);
+        margin-bottom: 2rem;
+        font-style: italic;
+    }
+
+    .testimonial-author {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .testimonial-avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid var(--gray-300);
+    }
+
+    .testimonial-author-info h5 {
+        margin-bottom: 0.25rem;
+        color: var(--dark);
+    }
+
+    .testimonial-author-info p {
+        color: var(--gray-500);
+        font-size: 0.9rem;
+        margin: 0;
+    }
+
+    .swiper-pagination-bullet {
+        width: 12px;
+        height: 12px;
+        background: var(--gray-300);
+        opacity: 1;
+    }
+
+    .swiper-pagination-bullet-active {
+        background: var(--primary);
+    }
+
+    /* How It Works */
+    .timeline {
+        position: relative;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 30px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, var(--primary), transparent);
+        }
+
+    .timeline-step {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 3rem;
+        position: relative;
+    }
+
+        .timeline-step:last-child {
+            margin-bottom: 0;
+        }
+
+    .step-number {
+        width: 60px;
+        height: 60px;
+        background: white;
+        border: 3px solid var(--primary);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 1.2rem;
+        color: var(--primary);
+        margin-right: 2rem;
+        flex-shrink: 0;
+        position: relative;
+        z-index: 2;
+    }
+
+    .step-content {
+        flex: 1;
+        padding-top: 0.5rem;
+    }
+
+        .step-content h4 {
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+        }
+
+        .step-content p {
+            color: var(--gray-500);
+        }
+
+    /* FAQ */
+    .accordion-button {
+        padding: 1.5rem;
+        font-weight: 600;
+        font-size: 1.1rem;
+        color: var(--dark);
+        background: white;
+        border: 1px solid var(--gray-300);
+        border-radius: 12px !important;
+        margin-bottom: 0.75rem;
+        box-shadow: none !important;
+    }
+
+        .accordion-button:not(.collapsed) {
+            background: white;
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .accordion-button:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.25rem rgba(37, 99, 235, 0.1) !important;
+        }
+
+    .accordion-body {
+        padding: 1.5rem;
+        color: var(--gray-500);
+        border: 1px solid var(--gray-300);
+        border-top: none;
+        border-radius: 0 0 12px 12px;
+    }
+
+    /* Footer */
+    footer {
+        background: var(--dark);
+        color: white;
+        padding: 4rem 0 2rem;
+    }
+
+    .footer-logo {
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: white;
+        margin-bottom: 1rem;
+    }
+
+    .footer-description {
+        color: var(--gray-300);
+        margin-bottom: 2rem;
+        max-width: 300px;
+    }
+
+    .footer-links h5 {
+        color: white;
+        margin-bottom: 1.5rem;
+        font-size: 1.1rem;
+    }
+
+    .footer-links ul {
+        list-style: none;
+        padding: 0;
+    }
+
+    .footer-links li {
+        margin-bottom: 0.75rem;
+    }
+
+    .footer-links a {
+        color: var(--gray-300);
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+        .footer-links a:hover {
+            color: white;
+            padding-left: 5px;
+        }
+
+    .footer-bottom {
+        border-top: 1px solid var(--gray-700);
+        padding-top: 2rem;
+        margin-top: 3rem;
+        text-align: center;
+        color: var(--gray-500);
+    }
+
+    /* Responsive */
+    @@media (max-width: 992px) {
+        .display-1 {
+            font-size: 2.8rem;
+        }
+
+        .display-2 {
+            font-size: 2.2rem;
+        }
+
+        .hero-stats {
+            padding: 1.5rem;
+        }
+
+        .stat-item {
+            padding: 0 1rem;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+        }
+
+        .pricing-card.popular {
+            transform: none;
+        }
+
+        .feature-card, .pricing-card, .testimonial-card {
+            margin-bottom: 2rem;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .display-1 {
+            font-size: 2.2rem;
+        }
+
+        .display-2 {
+            font-size: 1.8rem;
+        }
+
+        section {
+            padding: 3rem 0;
+        }
+
+        .stat-item {
+            border-right: none;
+            border-bottom: 1px solid var(--gray-300);
+            padding: 1rem 0;
+        }
+
+            .stat-item:last-child {
+                border-bottom: none;
+            }
+
+        .hero-gradient {
+            width: 100%;
+            clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
+            opacity: 0.05;
+        }
+    }
+</style>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-light">
+    <div class="container">
+        <a class="navbar-brand" href="#">
+            <i class="fas fa-store me-2"></i>VendorX
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mx-auto">
+                <li class="nav-item"><a class="nav-link active" href="#home">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="#features">Features</a></li>
+                <li class="nav-item"><a class="nav-link" href="#pricing">Pricing</a></li>
+                <li class="nav-item"><a class="nav-link" href="#how-it-works">How it Works</a></li>
+                <li class="nav-item"><a class="nav-link" href="#testimonials">Reviews</a></li>
+                <li class="nav-item"><a class="nav-link" href="#faq">FAQ</a></li>
+            </ul>
+            <div class="d-flex gap-3">
+                <a href="/Account/Login" class="btn btn-outline-primary px-4">Login</a>
+                <a href="#" class="btn btn-primary px-4">Start Free Trial</a>
             </div>
         </div>
     </div>
-}
+</nav>
+
+<!-- HERO SECTION -->
+<section id="home" class="hero-section">
+    <div class="hero-gradient"></div>
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 hero-content">
+                <h1 class="display-1 fw-bold mb-4">Smart Business Management for Modern Retailers</h1>
+                <p class="lead-lg text-gray-600 mb-5">Track sales, inventory, customer credit, and analytics from anywhere. Built specifically for Bangladeshi retailers with offline support and local payment integration.</p>
+                <div class="d-flex flex-wrap gap-3 mb-5">
+                    <a href="#" class="btn btn-primary btn-lg">
+                        <i class="fab fa-google-play me-2"></i> GET IT ON Google Play
+                    </a>
+                    <a href="#" class="btn btn-outline-primary btn-lg">
+                        <i class="fab fa-app-store me-2"></i> Available on App Store
+                    </a>
+                </div>
+                <div class="hero-stats">
+                    <div class="row text-center">
+                        <div class="col-md-4 stat-item">
+                            <div class="stat-number">4.9/5</div>
+                            <div class="stat-label">User Rating</div>
+                        </div>
+                        <div class="col-md-4 stat-item">
+                            <div class="stat-number">18K+</div>
+                            <div class="stat-label">Active Shops</div>
+                        </div>
+                        <div class="col-md-4 stat-item">
+                            <div class="stat-number">৳42Cr+</div>
+                            <div class="stat-label">Monthly Transactions</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="position-relative mt-5 mt-lg-0">
+                    <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&q=80&w=1600"
+                         class="img-fluid rounded-4 shadow-lg"
+                         alt="VendorX Dashboard">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features" class="py-5">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-subtitle">POWERFUL FEATURES</span>
+            <h2 class="section-title">Everything Your Shop Needs in One Platform</h2>
+            <p class="section-description">Designed specifically for Bangladeshi retailers with local needs in mind</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-cash-register"></i>
+                    </div>
+                    <h3 class="feature-title">Smart POS System</h3>
+                    <p class="feature-description">Fast billing with barcode scanning, digital receipts, multiple payment options, and tax calculation.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-boxes-stacked"></i>
+                    </div>
+                    <h3 class="feature-title">Inventory Management</h3>
+                    <p class="feature-description">Real-time stock tracking, low stock alerts, supplier management, and automated reordering.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-hand-holding-dollar"></i>
+                    </div>
+                    <h3 class="feature-title">Baki Management</h3>
+                    <p class="feature-description">Track customer credit, set limits, auto WhatsApp reminders, and generate monthly statements.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3 class="feature-title">Advanced Analytics</h3>
+                    <p class="feature-description">Detailed sales reports, profit analysis, customer insights, and business growth recommendations.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <h3 class="feature-title">Smart Notifications</h3>
+                    <p class="feature-description">WhatsApp & SMS alerts for payments, low stock, and daily summaries. Stay informed in real-time.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-qrcode"></i>
+                    </div>
+                    <h3 class="feature-title">QR Registration</h3>
+                    <p class="feature-description">Quick customer onboarding via QR code, digital profiles, and seamless credit setup.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing" class="bg-gray-100 py-5">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-subtitle">PRICING PLANS</span>
+            <h2 class="section-title">Choose the Perfect Plan for Your Business</h2>
+            <p class="section-description">Start with a 14-day free trial. No credit card required.</p>
+        </div>
+
+        <div class="row justify-content-center g-4">
+            <!-- Basic Plan -->
+            <div class="col-md-6 col-lg-4">
+                <div class="pricing-card">
+                    <div class="pricing-header">
+                        <h3 class="pricing-title">Basic</h3>
+                        <div class="pricing-price">৳499</div>
+                        <div class="pricing-period">per month</div>
+                        <small class="text-muted">Ideal for small shops & startups</small>
+                    </div>
+                    <ul class="pricing-features">
+                        <li><i class="fas fa-check"></i> Up to 200 products</li>
+                        <li><i class="fas fa-check"></i> Basic POS system</li>
+                        <li><i class="fas fa-check"></i> Up to 100 customers</li>
+                        <li><i class="fas fa-check"></i> Email support</li>
+                        <li class="disabled"><i class="fas fa-times"></i> Credit management</li>
+                        <li class="disabled"><i class="fas fa-times"></i> WhatsApp reminders</li>
+                        <li class="disabled"><i class="fas fa-times"></i> Advanced analytics</li>
+                    </ul>
+                    <div class="pricing-cta">
+                        <a href="#" class="btn btn-outline-primary w-100">Start Free Trial</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pro Plan (Popular) -->
+            <div class="col-md-6 col-lg-4">
+                <div class="pricing-card popular">
+                    <div class="popular-badge">Most Popular</div>
+                    <div class="pricing-header">
+                        <h3 class="pricing-title">Pro</h3>
+                        <div class="pricing-price">৳999</div>
+                        <div class="pricing-period">per month</div>
+                        <small>Perfect for growing businesses</small>
+                    </div>
+                    <ul class="pricing-features">
+                        <li><i class="fas fa-check"></i> Unlimited products</li>
+                        <li><i class="fas fa-check"></i> Advanced POS & invoicing</li>
+                        <li><i class="fas fa-check"></i> Unlimited customers</li>
+                        <li><i class="fas fa-check"></i> Credit management</li>
+                        <li><i class="fas fa-check"></i> WhatsApp reminders</li>
+                        <li><i class="fas fa-check"></i> Basic analytics</li>
+                        <li><i class="fas fa-check"></i> Priority support</li>
+                    </ul>
+                    <div class="pricing-cta">
+                        <a href="#" class="btn btn-primary w-100">Start Free Trial</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Business Plan -->
+            <div class="col-md-6 col-lg-4">
+                <div class="pricing-card">
+                    <div class="pricing-header">
+                        <h3 class="pricing-title">Business</h3>
+                        <div class="pricing-price">৳1,999</div>
+                        <div class="pricing-period">per month</div>
+                        <small class="text-muted">For multi-branch & enterprises</small>
+                    </div>
+                    <ul class="pricing-features">
+                        <li><i class="fas fa-check"></i> Everything in Pro</li>
+                        <li><i class="fas fa-check"></i> Multi-branch support</li>
+                        <li><i class="fas fa-check"></i> Advanced analytics</li>
+                        <li><i class="fas fa-check"></i> Custom reporting</li>
+                        <li><i class="fas fa-check"></i> API access</li>
+                        <li><i class="fas fa-check"></i> Dedicated manager</li>
+                        <li><i class="fas fa-check"></i> White-label solution</li>
+                    </ul>
+                    <div class="pricing-cta">
+                        <a href="#" class="btn btn-outline-primary w-100">Contact Sales</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section id="testimonials" class="testimonial-section py-5">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-subtitle">TESTIMONIALS</span>
+            <h2 class="section-title">Trusted by Thousands of Shop Owners</h2>
+            <p class="section-description">See what our users say about VendorX</p>
+        </div>
+
+        <div class="swiper testimonialSwiper">
+            <div class="swiper-wrapper">
+                <!-- Testimonial 1 -->
+                <div class="swiper-slide">
+                    <div class="testimonial-card">
+                        <div class="testimonial-rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <p class="testimonial-text">"VendorX has transformed how I manage my grocery store. The baki reminders alone have reduced my pending dues by 70%. This app is a game-changer for Bangladeshi retailers!"</p>
+                        <div class="testimonial-author">
+                            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80" class="testimonial-avatar" alt="Rahim Mia">
+                            <div class="testimonial-author-info">
+                                <h5>Rahim Mia</h5>
+                                <p>Grocery Store Owner • Dhaka</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Testimonial 2 -->
+                <div class="swiper-slide">
+                    <div class="testimonial-card">
+                        <div class="testimonial-rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star-half-alt"></i>
+                        </div>
+                        <p class="testimonial-text">"The inventory management system saved me from stockouts during Eid. Auto alerts and supplier tracking made my life so much easier. Highly recommended!"</p>
+                        <div class="testimonial-author">
+                            <img src="https://images.unsplash.com/photo-1494790108755-2616b786d4d3?w=400&q=80" class="testimonial-avatar" alt="Fatima Begum">
+                            <div class="testimonial-author-info">
+                                <h5>Fatima Begum</h5>
+                                <p>Clothing Store • Chittagong</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Testimonial 3 -->
+                <div class="swiper-slide">
+                    <div class="testimonial-card">
+                        <div class="testimonial-rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <p class="testimonial-text">"As someone who's not tech-savvy, I appreciate how easy VendorX is to use. The support team is always helpful, and the offline feature works perfectly in my area."</p>
+                        <div class="testimonial-author">
+                            <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w-400&q=80" class="testimonial-avatar" alt="Kamal Hossain">
+                            <div class="testimonial-author-info">
+                                <h5>Kamal Hossain</h5>
+                                <p>Electronics Shop • Sylhet</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="swiper-pagination"></div>
+        </div>
+    </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how-it-works" class="py-5">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-subtitle">GET STARTED</span>
+            <h2 class="section-title">Simple Setup in 4 Easy Steps</h2>
+            <p class="section-description">Start managing your business better in just minutes</p>
+        </div>
+
+        <div class="timeline">
+            <div class="timeline-step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h4>Sign Up & Setup Your Shop</h4>
+                    <p>Create your account and add your shop details, business type, and basic information. Takes less than 5 minutes.</p>
+                </div>
+            </div>
+            <div class="timeline-step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h4>Add Products & Customers</h4>
+                    <p>Upload your inventory using barcode scanning or manual entry. Register customers via QR code or phone number.</p>
+                </div>
+            </div>
+            <div class="timeline-step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h4>Start Selling & Managing</h4>
+                    <p>Use the POS for cash/credit sales. Track inventory, manage customer credit, and send automatic reminders.</p>
+                </div>
+            </div>
+            <div class="timeline-step">
+                <div class="step-number">4</div>
+                <div class="step-content">
+                    <h4>Grow & Optimize Your Business</h4>
+                    <p>Analyze sales reports, identify trends, optimize stock levels, and increase profitability with data-driven decisions.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq" class="bg-gray-100 py-5">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-subtitle">FAQ</span>
+            <h2 class="section-title">Frequently Asked Questions</h2>
+            <p class="section-description">Find answers to common questions about VendorX</p>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="accordion" id="faqAccordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                                Can I use VendorX offline?
+                            </button>
+                        </h2>
+                        <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Yes! VendorX works seamlessly offline. All your data syncs automatically when you reconnect to the internet. Perfect for areas with unstable connections.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                                Is my business data secure?
+                            </button>
+                        </h2>
+                        <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Absolutely. We use bank-level encryption and security protocols. Your data is regularly backed up and never shared with third parties without your permission.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                                Can I manage multiple shops?
+                            </button>
+                        </h2>
+                        <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Yes, with our Business plan, you can manage multiple branches from a single dashboard with consolidated reporting and centralized control.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
+                                How does the baki system work?
+                            </button>
+                        </h2>
+                        <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                The baki system automatically tracks customer credit, sends WhatsApp reminders for due payments, generates monthly statements, and helps you manage credit limits effectively.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq5">
+                                Is there a free trial?
+                            </button>
+                        </h2>
+                        <div id="faq5" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Yes! All plans come with a 14-day free trial. No credit card required. You get full access to all features during the trial period.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-4 mb-4">
+                <div class="footer-logo"><i class="fas fa-store me-2"></i>VendorX</div>
+                <p class="footer-description">Complete business management solution designed specifically for Bangladeshi retailers.</p>
+                <div class="d-flex gap-3">
+                    <a href="#" class="text-white"><i class="fab fa-facebook fa-lg"></i></a>
+                    <a href="#" class="text-white"><i class="fab fa-youtube fa-lg"></i></a>
+                    <a href="#" class="text-white"><i class="fab fa-linkedin fa-lg"></i></a>
+                    <a href="#" class="text-white"><i class="fab fa-instagram fa-lg"></i></a>
+                </div>
+            </div>
+
+            <div class="col-lg-2 col-md-6 mb-4 footer-links">
+                <h5>Product</h5>
+                <ul>
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#pricing">Pricing</a></li>
+                    <li><a href="#testimonials">Testimonials</a></li>
+                    <li><a href="#">Updates</a></li>
+                </ul>
+            </div>
+
+            <div class="col-lg-2 col-md-6 mb-4 footer-links">
+                <h5>Company</h5>
+                <ul>
+                    <li><a href="#">About Us</a></li>
+                    <li><a href="#">Careers</a></li>
+                    <li><a href="#">Blog</a></li>
+                    <li><a href="#">Contact</a></li>
+                </ul>
+            </div>
+
+            <div class="col-lg-4 mb-4 footer-links">
+                <h5>Contact Us</h5>
+                <ul class="list-unstyled">
+                    <li class="mb-3"><i class="fas fa-envelope me-2"></i> support@vendorx.com</li>
+                    <li class="mb-3"><i class="fas fa-phone me-2"></i> +880 1234-567890</li>
+                    <li><i class="fas fa-map-marker-alt me-2"></i> Dhaka, Bangladesh</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p class="mb-0">© 2024 VendorX. All rights reserved. | <a href="#" class="text-gray-300">Privacy Policy</a> | <a href="#" class="text-gray-300">Terms of Service</a></p>
+        </div>
+    </div>
+</footer>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
+<script>
+    // Initialize Swiper for testimonials
+    const swiper = new Swiper('.testimonialSwiper', {
+        slidesPerView: 1,
+        spaceBetween: 30,
+        loop: true,
+        autoplay: {
+            delay: 5000,
+            disableOnInteraction: false,
+        },
+        pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+        },
+        breakpoints: {
+            768: {
+                slidesPerView: 2,
+            },
+            992: {
+                slidesPerView: 3,
+            }
+        }
+    });
+
+    // Navbar scroll effect
+    window.addEventListener('scroll', function() {
+        const navbar = document.querySelector('.navbar');
+        if (window.scrollY > 50) {
+            navbar.classList.add('navbar-scrolled');
+        } else {
+            navbar.classList.remove('navbar-scrolled');
+        }
+    });
+
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('href');
+            if (targetId === '#') return;
+
+            const targetElement = document.querySelector(targetId);
+            if (targetElement) {
+                window.scrollTo({
+                    top: targetElement.offsetTop - 80,
+                    behavior: 'smooth'
+                });
+            }
+        });
+    });
+</script>

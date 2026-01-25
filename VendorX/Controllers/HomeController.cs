@@ -44,7 +44,9 @@ namespace VendorX.Controllers
             }
 
             // If not authenticated, redirect to login
-            return RedirectToAction("Login", "Account");
+            //return RedirectToAction("Login", "Account");
+
+            return View();
         }
 
         public IActionResult Privacy()

@@ -221,6 +221,11 @@
             width: 3rem;
             height: 3rem;
         }
+        .home-container
+        {
+            margin:0px;
+            padding:0px
+        }
     </style>
 </head>
 <body>
@@ -393,7 +398,7 @@
     }
     else
     {
-        <!-- Public Layout (No Sidebar) -->
+        @* <!-- Public Layout (No Sidebar) -->
         <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
             <div class="container-fluid">
                 <a class="navbar-brand" asp-controller="Home" asp-action="Index">
@@ -408,8 +413,8 @@
                     </a>
                 </div>
             </div>
-        </nav>
-        <div class="container mt-4">
+        </nav> *@
+        <div class="home-container">
             @RenderBody()
         </div>
     }
